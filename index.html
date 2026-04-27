@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATLAS — Sistema de Diagnóstico de Marketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --rose-100:#f9cccb;--rose-200:#f0a9a7;--rose-600:#c97f7d;--rose-700:#a85e5c;
+  --slate-50:#f5f5f4;--slate-100:#e3e5e4;--slate-200:#cdd0cf;
+  --slate-500:#525d69;--slate-800:#2d2d2d;--slate-900:#1a1a1a;
+  --green:#7aad7a;--amber:#e5b97a;--blue:#378ADD;--teal:#1D9E75;--red:#E24B4A;
+}
+[data-theme="dark"]{
+  --bg:#0f1110;--bg2:#161918;--bg3:#1c1e1d;
+  --surf:rgba(255,255,255,0.04);--surf2:rgba(255,255,255,0.08);--surf3:rgba(255,255,255,0.13);
+  --t1:#e8e8e6;--t2:#8a8f8c;--t3:rgba(138,143,140,0.5);
+  --acc:var(--rose-600);--acc-l:var(--rose-100);--acc-t:rgba(201,127,125,0.12);
+  --bor:rgba(255,255,255,0.07);--bor2:rgba(255,255,255,0.13);--shd:rgba(0,0,0,0.4);
+  --r-bg:#3D1212;--r-t:#F5A5A5;--a-bg:#3D2A08;--a-t:#F5C87A;
+  --g-bg:#122810;--g-t:#9DD47A;--bl-bg:#0C2540;--bl-t:#7BBEF5;
+  --gr-bg:#252420;--gr-t:#A8A49C;--te-bg:#0a2420;--te-t:#5DD4AC;
+}
+[data-theme="light"]{
+  --bg:#f0f0ee;--bg2:#f7f7f6;--bg3:#ffffff;
+  --surf:rgba(255,255,255,0.5);--surf2:rgba(255,255,255,0.82);--surf3:#ffffff;
+  --t1:#1a1a1a;--t2:#525d69;--t3:rgba(82,93,105,0.5);
+  --acc:var(--rose-600);--acc-l:var(--rose-700);--acc-t:rgba(249,204,203,0.3);
+  --bor:rgba(45,45,45,0.09);--bor2:rgba(45,45,45,0.16);--shd:rgba(45,45,45,0.08);
+  --r-bg:#FCEBEB;--r-t:#A32D2D;--a-bg:#FAEEDA;--a-t:#854F0B;
+  --g-bg:#EAF3DE;--g-t:#3B6D11;--bl-bg:#E6F1FB;--bl-t:#185FA5;
+  --gr-bg:#F1EFE8;--gr-t:#5F5E5A;--te-bg:#E0F5EE;--te-t:#0D6B50;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;transition:background .3s,color .3s}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:.7rem 2rem;background:rgba(15,17,16,0.88);backdrop-filter:blur(20px);border-bottom:.5px solid var(--bor2);transition:background .3s}
+[data-theme="light"] .hdr{background:rgba(240,240,238,0.88)}
+.hdr-l{display:flex;align-items:center;gap:.9rem}
+.logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.1em;color:var(--acc-l)}
+.logo-sub{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;letter-spacing:.08em}
+.hdr-sep{width:1px;height:16px;background:var(--bor2)}
+.hdr-r{display:flex;align-items:center;gap:.75rem}
+.prog-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}
+.theme-tgl{display:flex;align-items:center;background:var(--surf2);border:.5px solid var(--bor2);border-radius:100px;padding:3px;cursor:pointer}
+.t-btn{font-size:10px;font-weight:500;font-family:'Poppins',sans-serif;padding:3px 11px;border-radius:100px;border:none;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s;letter-spacing:.03em;text-transform:uppercase}
+.t-btn.on{background:var(--t1);color:var(--bg)}
+
+/* SCORE BAR */
+.score-strip{position:sticky;top:45px;z-index:199;background:var(--bg2);border-bottom:.5px solid var(--bor);padding:.55rem 2rem;display:flex;align-items:center;gap:1.25rem;transition:background .3s}
+.score-pill{display:flex;align-items:center;gap:.6rem;background:var(--surf);border:.5px solid var(--bor2);border-radius:100px;padding:.3rem 1rem;min-width:260px}
+.score-num{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;transition:color .4s}
+.score-label{font-size:11px;font-weight:600;transition:color .4s}
+.score-bar-outer{flex:1;height:6px;background:var(--surf2);border-radius:100px;overflow:hidden;min-width:80px}
+.score-bar-inner{height:100%;border-radius:100px;transition:width .5s cubic-bezier(.4,0,.2,1),background .4s}
+.score-verdict{font-size:11px;color:var(--t2);font-family:'DM Mono',monospace}
+.prog-bar-wrap{height:2px;background:var(--bor)}
+.prog-bar-fill{height:100%;background:var(--acc);transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* LAYOUT */
+.page{max-width:800px;margin:0 auto;padding:2.5rem 2rem 7rem}
+
+/* STEP NAV */
+.snav{display:flex;gap:6px;margin-bottom:2.5rem;flex-wrap:wrap}
+.spill{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;font-size:11px;font-weight:500;border:.5px solid var(--bor2);background:var(--surf);color:var(--t3);cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif}
+.spill.on{background:var(--acc-t);border-color:var(--acc);color:var(--acc-l)}
+.spill.done{border-color:var(--green);color:var(--green);background:rgba(122,173,122,0.08)}
+.spill.locked{cursor:not-allowed;opacity:.35}
+.snum{font-family:'DM Mono',monospace;font-size:9px;background:var(--surf2);border-radius:100px;padding:1px 6px;color:var(--t3)}
+.spill.on .snum{background:var(--acc-t);color:var(--acc)}
+.spill.done .snum{background:rgba(122,173,122,0.15);color:var(--green)}
+
+/* PANEL */
+.panel{display:none}.panel.on{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEAD */
+.eyebrow{font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);margin-bottom:.5rem}
+.stitle{font-size:22px;font-weight:700;color:var(--t1);letter-spacing:-.03em;line-height:1.2;margin-bottom:.5rem}
+.sdesc{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:2rem;max-width:560px}
+
+/* BLOCKER */
+.blocker{display:none;background:var(--r-bg);border:.5px solid rgba(229,75,74,0.35);border-radius:14px;padding:1.5rem;margin-bottom:2rem}
+.blocker.show{display:block;animation:fi .2s ease}
+.blocker-title{font-size:16px;font-weight:700;color:var(--r-t);margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.blocker-body{font-size:13px;color:var(--r-t);opacity:.85;line-height:1.65;margin-bottom:1rem}
+.blocker-list{list-style:none;margin-bottom:1rem}
+.blocker-list li{font-size:12.5px;color:var(--r-t);padding:5px 0;border-bottom:.5px solid rgba(229,75,74,0.15);display:flex;align-items:center;gap:.5rem}
+.blocker-list li:last-child{border-bottom:none}
+.blocker-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:.5rem}
+
+/* QUESTION CARD */
+.qcard{background:var(--surf);border:.5px solid var(--bor2);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;transition:border-color .2s}
+.qcard.ok{border-color:rgba(122,173,122,0.35)}
+.qcard.warn{border-color:rgba(229,185,122,0.5)}
+.qcard.block{border-color:rgba(229,75,74,0.5)}
+.qlbl{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:.7rem;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:.5rem}
+.qtext{font-size:14px;font-weight:500;color:var(--t1);margin-bottom:.3rem;line-height:1.45;letter-spacing:-.01em}
+.qhint{font-size:11.5px;color:var(--t3);margin-bottom:.75rem;line-height:1.5}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:.75rem}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:10px;border:.5px solid var(--bor2);background:var(--surf2);font-size:12.5px;color:var(--t2);cursor:pointer;text-align:left;font-family:'Poppins',sans-serif;transition:all .15s;line-height:1.45}
+.opt:hover{background:var(--surf3);border-color:var(--t3);color:var(--t1)}
+.opt.sel{background:var(--acc-t);border-color:var(--acc);color:var(--acc-l)}
+.opt.sel-warn{background:rgba(229,185,122,0.1);border-color:rgba(229,185,122,0.5);color:var(--a-t)}
+.opt.sel-block{background:rgba(229,75,74,0.08);border-color:rgba(229,75,74,0.45);color:var(--r-t)}
+.odot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--bor2);flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.opt.sel .odot,.opt.sel-warn .odot,.opt.sel-block .odot{border-color:currentColor}
+.odot::after{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0;transition:opacity .15s}
+.opt.sel .odot::after,.opt.sel-warn .odot::after,.opt.sel-block .odot::after{opacity:1}
+
+/* EVIDENCE FIELD */
+.evi-wrap{margin-top:.75rem;display:flex;flex-direction:column;gap:6px}
+.evi-row{display:flex;flex-direction:column;gap:3px}
+.evi-lbl{font-size:10px;font-family:'DM Mono',monospace;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+.evi-inp{background:var(--surf2);border:.5px solid var(--bor);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--t1);font-family:'Poppins',sans-serif;outline:none;transition:border-color .2s;width:100%}
+.evi-inp:focus{border-color:var(--acc)}
+.evi-inp::placeholder{color:var(--t3)}
+textarea.evi-inp{resize:vertical;min-height:58px;line-height:1.5}
+
+/* SCORE INLINE */
+.q-score{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:auto}
+
+/* NAV */
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.5rem;border-top:.5px solid var(--bor)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;border:none;transition:all .2s;letter-spacing:-.01em}
+.btn-p{background:var(--acc);color:#fff}
+.btn-p:hover{background:var(--rose-700);transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,127,125,.35)}
+.btn-g{background:var(--surf2);color:var(--t2);border:.5px solid var(--bor2)}
+.btn-g:hover{background:var(--surf3);color:var(--t1)}
+.btn-danger{background:var(--r-bg);color:var(--r-t);border:.5px solid rgba(229,75,74,.25)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* SKIP */
+.skip-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surf);border:.5px solid var(--bor);border-radius:10px;padding:.6rem 1rem;margin-bottom:1.5rem;font-size:12px;color:var(--t3)}
+.skip-btn{font-size:11px;font-weight:500;color:var(--acc);background:none;border:none;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:underline;text-underline-offset:2px}
+
+/* SEP */
+.sep{height:.5px;background:var(--bor2);margin:1.75rem 0}
+
+/* ── OUTPUT ── */
+.out-hdr{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+.out-icon{width:44px;height:44px;border-radius:12px;background:var(--acc-t);border:.5px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.out-stamp{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--t3);margin-bottom:2px}
+.out-name{font-size:20px;font-weight:700;color:var(--t1);letter-spacing:-.025em}
+
+/* SCORE DASHBOARD */
+.score-dash{background:var(--surf);border:.5px solid var(--bor2);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.score-cell{display:flex;flex-direction:column;gap:4px}
+.sc-label{font-family:'DM Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3)}
+.sc-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.02em}
+.sc-sub{font-size:11px;color:var(--t2)}
+.verdict-bar{height:8px;border-radius:100px;background:var(--surf2);overflow:hidden;margin-top:6px}
+.verdict-fill{height:100%;border-radius:100px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* OUT BLOCK */
+.ob{background:var(--surf);border:.5px solid var(--bor2);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.ob-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.ob-lbl{font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--t3)}
+.os{margin-bottom:.85rem}.os:last-child{margin-bottom:0}
+.ok-key{font-size:10.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;font-family:'DM Mono',monospace}
+.ok-val{font-size:13px;color:var(--t1);line-height:1.6}
+.ok-val strong{color:var(--acc-l);font-weight:600}
+
+/* AMPLIFY CARD */
+.amp-card{background:var(--acc-t);border:.5px solid var(--acc);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.amp-layer{font-family:'DM Mono',monospace;font-size:22px;font-weight:300;color:var(--acc-l);letter-spacing:-.02em;margin-bottom:.2rem}
+.amp-sub{font-size:13px;color:var(--acc);margin-bottom:.75rem}
+.fw-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
+.fw-chip{font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;background:var(--gr-bg);color:var(--gr-t)}
+
+/* HYPOTHESIS */
+.hyp{background:var(--surf2);border-radius:12px;padding:1.1rem 1.25rem;font-size:13px;line-height:2.1;color:var(--t1);border:.5px solid var(--bor)}
+.hyp em{color:var(--t3);font-style:italic}
+.hyp strong{color:var(--acc-l);font-style:normal}
+
+/* PLAYBOOK CTA */
+.pb-cta{border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:.75rem;border:.5px solid;display:flex;align-items:flex-start;gap:1rem}
+.pb-cta-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.pb-cta-body{flex:1}
+.pb-cta-label{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:3px}
+.pb-cta-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:5px}
+.pb-items{display:flex;flex-wrap:wrap;gap:5px}
+.pb-item{font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surf2);border:.5px solid var(--bor2);color:var(--t2)}
+
+/* ATLAS CTA */
+.atlas-cta{background:linear-gradient(135deg,rgba(29,158,117,.1),rgba(29,158,117,.04));border:.5px solid rgba(29,158,117,.3);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem}
+.atlas-icon{width:38px;height:38px;border-radius:10px;background:rgba(29,158,117,.15);border:.5px solid rgba(29,158,117,.3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.atlas-txt{flex:1}
+.atlas-lbl{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--te-t);font-family:'DM Mono',monospace;margin-bottom:2px}
+.atlas-title{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.atlas-desc{font-size:12px;color:var(--t2);line-height:1.5}
+.btn-teal{background:rgba(29,158,117,.15);color:var(--te-t);border:.5px solid rgba(29,158,117,.3);padding:8px 16px}
+.btn-teal:hover{background:rgba(29,158,117,.25)}
+
+/* COPY BTN */
+.cp-btn{font-size:10px;font-weight:500;font-family:'DM Mono',monospace;padding:4px 12px;border-radius:100px;border:.5px solid var(--bor2);background:var(--surf2);color:var(--t3);cursor:pointer;transition:all .15s;letter-spacing:.06em;text-transform:uppercase}
+.cp-btn:hover{border-color:var(--acc);color:var(--acc)}
+.cp-btn.copied{border-color:var(--green);color:var(--g-t);background:var(--g-bg)}
+
+/* SUGGESTION CHIPS */
+.sug-chip{font-size:11px;padding:4px 10px;border-radius:8px;border:.5px solid var(--bor2);background:var(--surf2);color:var(--t2);cursor:pointer;font-family:'Poppins',sans-serif;line-height:1.4;text-align:left;transition:all .15s}
+.sug-chip:hover{background:var(--acc-t);border-color:var(--acc);color:var(--acc-l)}
+
+/* RESTART */
+.restart-row{display:flex;justify-content:center;margin-top:2rem}
+
+/* MANUAL MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-bg.show{display:flex}
+.modal{background:var(--bg2);border:.5px solid var(--bor2);border-radius:18px;max-width:620px;width:100%;max-height:85vh;overflow-y:auto;padding:2rem}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.modal-title{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-.02em}
+.modal-close{background:var(--surf2);border:.5px solid var(--bor2);border-radius:100px;padding:4px 14px;font-size:12px;color:var(--t2);cursor:pointer;font-family:'Poppins',sans-serif}
+.modal-section{margin-bottom:1.5rem}
+.modal-sh{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-family:'DM Mono',monospace;margin-bottom:.6rem}
+.modal-p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:.6rem}
+.modal-list{list-style:none}
+.modal-list li{font-size:13px;color:var(--t2);line-height:1.65;padding:4px 0;border-bottom:.5px solid var(--bor);display:flex;gap:.5rem}
+.modal-list li:last-child{border-bottom:none}
+.modal-list li::before{content:'→';color:var(--acc);flex-shrink:0}
+.modal-disclaimer{background:var(--a-bg);border:.5px solid rgba(229,185,122,.25);border-radius:10px;padding:1rem;font-size:12px;color:var(--a-t);line-height:1.65}
+
+/* SCROLL TOP */
+.stop{position:fixed;bottom:2rem;right:2rem;width:36px;height:36px;border-radius:50%;background:var(--surf2);border:.5px solid var(--bor2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--t2);transition:all .2s;z-index:100;opacity:0;pointer-events:none}
+.stop.vis{opacity:1;pointer-events:auto}
+.stop:hover{background:var(--surf3);color:var(--t1)}
+/* ── REFERENCE SUB-TABS ── */
+.ref-subtabs{display:flex;gap:6px;margin-bottom:1.25rem;border-bottom:.5px solid var(--bor2);padding-bottom:.75rem}
+.ref-subtab{font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:8px;border:.5px solid var(--bor2);background:var(--surf2);color:var(--t2);cursor:pointer;transition:all .15s}
+.ref-subtab.active{background:var(--surf3);color:var(--t1);border-color:var(--bor3)}
+.ref-subpanel{display:none}
+.ref-subpanel.active{display:block}
+
+/* ── REFERENCE PANELS ── */
+.ref-block{background:var(--surf);border:.5px solid var(--bor2);border-left:3px solid var(--acc);border-radius:0 14px 14px 0;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.ref-eyebrow{font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:.35rem}
+.ref-title{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.02em;margin-bottom:.5rem;line-height:1.3}
+.ref-body{font-size:12.5px;color:var(--t2);line-height:1.65;margin-bottom:.75rem}
+.ref-note{font-size:11.5px;color:var(--t3);line-height:1.6;background:var(--surf2);border-radius:8px;padding:.6rem .85rem;margin-top:.75rem;border:.5px solid var(--bor)}
+
+/* AMPLIFY layers */
+.ref-layers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:.75rem}
+.ref-layer{background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;padding:.75rem 1rem}
+.ref-layer-name{font-size:11px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.ref-layer-items{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);margin-bottom:.4rem}
+.ref-layer-desc{font-size:11.5px;color:var(--t2);line-height:1.5}
+
+/* Framework cards */
+.ref-fw-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.75rem}
+.ref-fw-card{background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;padding:.85rem 1rem}
+.ref-fw-name{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:1px}
+.ref-fw-book{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--t3);margin-bottom:.5rem}
+.ref-fw-q{font-size:11.5px;font-weight:600;color:var(--t1);margin-bottom:.35rem}
+.ref-fw-tool{font-size:11px;color:var(--acc);margin-bottom:.5rem;line-height:1.4}
+.ref-fw-when{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:.35rem}
+.ref-fw-not{font-size:11px;color:var(--t3);line-height:1.5;padding-top:.35rem;border-top:.5px solid var(--bor)}
+
+/* Error rows */
+.ref-errors{display:flex;flex-direction:column;gap:0;margin-top:.75rem;background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;overflow:hidden}
+.ref-error-row{display:grid;grid-template-columns:160px 1fr;padding:10px 14px;border-bottom:.5px solid var(--bor);gap:0}
+.ref-error-row:last-child{border-bottom:none}
+.ref-error-label{font-size:12px;font-weight:600;color:var(--t1);padding-right:12px;line-height:1.4}
+.ref-error-body{font-size:12px;color:var(--t2);line-height:1.55}
+
+/* Decision tree */
+.ref-tree{display:flex;flex-direction:column;gap:0;margin-top:.75rem;background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;overflow:hidden}
+.ref-tree-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 14px;border-bottom:.5px solid var(--bor);gap:12px}
+.ref-tree-row:last-child{border-bottom:none}
+.ref-tree-q{font-size:12px;color:var(--t2);line-height:1.5}
+.ref-tree-a{font-size:12px;font-weight:600;color:var(--t1);line-height:1.5}
+
+/* Filter checklist */
+.ref-filter{display:flex;flex-direction:column;gap:6px;margin-bottom:.25rem}
+.ref-filter-item{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--t2);line-height:1.5}
+.ref-filter-num{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:20px;height:20px;border-radius:50%;background:rgba(122,173,122,0.15);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+/* Hypothesis ref table */
+.hyp-ref-table{background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;overflow:hidden}
+.hyp-ref-row{display:grid;grid-template-columns:110px 1fr;padding:11px 14px;border-bottom:.5px solid var(--bor);gap:0}
+.hyp-ref-row:last-child{border-bottom:none}
+.hyp-ref-label{font-size:12px;font-weight:600;color:var(--t1);padding-right:12px;line-height:1.4}
+.hyp-ref-body{font-size:12px;color:var(--t2);line-height:1.55}
+.hyp-ref-eg{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--acc);margin-top:4px;background:var(--acc-t);border-radius:5px;padding:3px 7px;display:inline-block;line-height:1.5}
+.hyp-ref-diag{font-size:11px;color:var(--t3);margin-top:4px;font-style:italic;line-height:1.4}
+.hyp-ref-bad{font-size:11px;color:var(--red);margin-top:4px;line-height:1.4;background:var(--r-bg);border-radius:5px;padding:3px 7px;display:inline-block}
+
+/* Hypothesis examples */
+.hyp-ex{background:var(--surf2);border:.5px solid var(--bor2);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.75rem}
+.hyp-ex:last-of-type{margin-bottom:.75rem}
+.hyp-ex-tag{font-size:10px;font-weight:500;color:var(--acc);background:var(--acc-t);border:.5px solid var(--acc);border-radius:100px;padding:2px 9px;display:inline-block;margin-bottom:.6rem;letter-spacing:.03em}
+.hyp-ex-body{font-size:13px;color:var(--t1);line-height:2.1;margin-bottom:.5rem}
+.hyp-ex-body strong{color:var(--acc-l);font-weight:600}
+.hyp-ex-bad{font-size:11px;color:var(--red);background:var(--r-bg);border-radius:7px;padding:.45rem .7rem;line-height:1.55}
+</style>
+<body>
+
+<!-- MANUAL MODAL -->
+<div class="modal-bg" id="manual-modal">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Manual de uso — ATLAS</div>
+    <button class="modal-close" onclick="closeManual()">Cerrar ×</button>
+  </div>
+  <div class="modal-section">
+    <div class="modal-sh">¿Qué es ATLAS?</div>
+    <p class="modal-p">ATLAS es un sistema de diagnóstico estratégico diseñado para identificar el cuello de botella principal de un negocio.</p>
+    <p class="modal-p">Forma parte de AMPLIFY, un sistema más amplio de toma de decisiones en marketing y producto, donde ATLAS opera como la capa de diagnóstico antes de activar cualquier estrategia.</p>
+    <p class="modal-p">No es un formulario. Es un árbol de decisión con lógica de bloqueo: si la fundación falla, ATLAS detiene el diagnóstico de marketing porque aplicar marketing a un problema de fundación produce ruido, no resultados.</p>
+  </div>
+  <div class="modal-section">
+    <div class="modal-sh">Cómo funciona el Score</div>
+    <p class="modal-p">Cada respuesta tiene un peso según su impacto en la viabilidad del negocio:</p>
+    <ul class="modal-list">
+      <li>Problema validado / producto con retención / modelo rentable — peso crítico (−30 pts cada uno si falla)</li>
+      <li>ICP definido / posicionamiento claro — peso alto (−15 pts cada uno si falla)</li>
+      <li>Cuello de botella con datos — peso medio (−10 pts si no hay datos)</li>
+    </ul>
+    <p class="modal-p" style="margin-top:.6rem">Score 80–100: fundación sólida, procede a marketing. Score 50–79: ajuste recomendado. Score &lt;50: detener marketing, resolver fundación.</p>
+  </div>
+  <div class="modal-section">
+    <div class="modal-sh">Cómo usar la capa de evidencia</div>
+    <p class="modal-p">Cada pregunta crítica tiene campos de evidencia. No son opcionales si quieres un output válido. El diagnóstico sin evidencia es opinión. Evidencia mínima aceptable:</p>
+    <ul class="modal-list">
+      <li>5+ entrevistas reales con ICP documentadas</li>
+      <li>Datos de funnel de al menos 4 semanas activas</li>
+      <li>Patrón de deals perdidos (win/loss)</li>
+      <li>Feedback directo de clientes, no supuestos internos</li>
+    </ul>
+  </div>
+  <div class="modal-section">
+    <div class="modal-sh">Qué produce ATLAS</div>
+    <ul class="modal-list">
+      <li>Score de fundación con nivel de riesgo</li>
+      <li>Routing a capa AMPLIFY + frameworks específicos</li>
+      <li>Hipótesis de trabajo en formato estructurado</li>
+      <li>Playbook recomendado según cuello de botella</li>
+      <li>Redirect al Funnel Atlas 2026 con contexto pre-cargado</li>
+      <li>Brief completo copiable en texto plano</li>
+    </ul>
+  </div>
+  <div class="modal-disclaimer">
+    <strong>Disclaimer operativo:</strong> ATLAS no reemplaza criterio estratégico. Las respuestas subjetivas sin evidencia producen un diagnóstico con baja confianza. Si saltaste la capa de evidencia, el output es una hipótesis de trabajo, no un diagnóstico validado. Los scores son orientativos — no son métricas de negocio absolutas.
+  </div>
+</div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-l">
+    <div>
+      <div class="logo">ATLAS</div>
+      <div class="logo-sub">Sistema de Diagnóstico de Marketing</div>
+    </div>
+    <div class="hdr-sep"></div>
+    <button class="btn btn-g" style="padding:5px 14px;font-size:11px" onclick="openManual()">Manual ↗</button>
+  </div>
+  <div class="hdr-r">
+    <span class="prog-lbl" id="progLbl">Paso 1 de 3</span>
+    <div class="theme-tgl">
+      <button class="t-btn" id="btnL" onclick="setTheme('light')">Claro</button>
+      <button class="t-btn on" id="btnD" onclick="setTheme('dark')">Oscuro</button>
+    </div>
+  </div>
+</header>
+
+<!-- SCORE STRIP -->
+<div class="score-strip">
+  <div class="score-pill">
+    <span class="score-num" id="sc-num" style="color:var(--t3)">—</span>
+    <span style="font-size:11px;color:var(--t3)">/100</span>
+    <div class="score-bar-outer" style="margin-left:.25rem">
+      <div class="score-bar-inner" id="sc-bar" style="width:0%;background:var(--t3)"></div>
+    </div>
+    <span class="score-label" id="sc-label" style="color:var(--t3)">Sin datos aún</span>
+  </div>
+  <span class="score-verdict" id="sc-verdict"></span>
+</div>
+<div class="prog-bar-wrap">
+  <div class="prog-bar-fill" id="pbFill" style="width:33%"></div>
+</div>
+
+<div class="page">
+
+<!-- STEP NAV -->
+<div class="snav">
+  <div class="spill on" id="nav0" onclick="tryNav(0)"><span class="snum">01</span> Fundación</div>
+  <div class="spill locked" id="nav1" onclick="tryNav(1)"><span class="snum">02</span> Marketing</div>
+  <div class="spill locked" id="nav2" onclick="tryNav(2)"><span class="snum">03</span> Output</div>
+  <div class="spill" id="nav3" onclick="goRef(3)" style="margin-left:auto;border-color:rgba(55,138,221,0.35);color:var(--b-blue-t)"><span class="snum" style="background:rgba(55,138,221,0.1);color:var(--b-blue-t)">↗</span> Consultar teoría</div>
+  <div class="spill" id="nav4" onclick="goRef(4)" style="border-color:rgba(201,127,125,0.35);color:var(--acc)"><span class="snum" style="background:var(--acc-t);color:var(--acc)">?</span> Cómo llenar hipótesis</div>
+</div>
+
+<!-- ═══════════════ PANEL 0 — FUNDACIÓN ═══════════════ -->
+<div class="panel on" id="p0">
+  <div class="eyebrow">Paso 0 · Antes de tocar marketing</div>
+  <div class="stitle">Diagnóstico de Fundación</div>
+  <div class="sdesc">Determina si el problema está en la estructura del negocio. Aplicar marketing a un problema de fundación produce ruido, no resultados. Esta sección se corre siempre primero.</div>
+
+  <!-- BLOCKER -->
+  <div class="blocker" id="blocker0">
+    <div class="blocker-title">⛔ Esto no es un problema de marketing</div>
+    <div class="blocker-body">Se detectaron fallas críticas en la fundación. Continuar a marketing aquí es un error estratégico. Los problemas identificados:</div>
+    <ul class="blocker-list" id="blocker-list"></ul>
+    <div class="blocker-actions">
+      <button class="btn btn-danger" onclick="forceAdvance()">Continuar de todas formas (con riesgo)</button>
+      <button class="btn btn-g" onclick="openManual()">Ver guía de resolución</button>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="qcard" id="qc-stage">
+    <div class="qlbl">Q1 · Etapa de la empresa</div>
+    <div class="qtext">¿En qué momento está la empresa?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('stage','hyp',this,'ok')"><div class="odot"></div>Hipótesis / pre-revenue — sin clientes pagando</button>
+      <button class="opt" onclick="sel('stage','early',this,'ok')"><div class="odot"></div>Early adopters / tracción — primeros clientes</button>
+      <button class="opt" onclick="sel('stage','growth',this,'ok')"><div class="odot"></div>Crecimiento / escalando — ventas repetibles</button>
+      <button class="opt" onclick="sel('stage','mid',this,'ok')"><div class="odot"></div>Empresa mediana o consolidada</button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qcard" id="qc-problem">
+    <div class="qlbl">Q2 · Problema real <span id="badge-problem"></span></div>
+    <div class="qtext">¿Existe evidencia de que hay una necesidad real activa?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('problem','validated',this,'ok')"><div class="odot"></div>Sí — 5+ entrevistas reales, clientes usando alternativas imperfectas</button>
+      <button class="opt" onclick="sel('problem','partial',this,'warn')"><div class="odot"></div>Parcial — hay señales pero sin evidencia estructurada</button>
+      <button class="opt" onclick="sel('problem','no',this,'block')"><div class="odot"></div>No — hipótesis sin validar</button>
+    </div>
+    <div class="evi-wrap" id="evi-problem" style="display:none">
+      <div class="evi-row"><div class="evi-lbl">¿Qué dato lo prueba?</div><input class="evi-inp" placeholder="Ej: 7 entrevistas, 5 de 7 mencionaron el mismo frictionpoint" oninput="storeEvi('problem_proof',this.value)"></div>
+      <div class="evi-row"><div class="evi-lbl">¿Dónde lo viste / cuándo?</div><input class="evi-inp" placeholder="Ej: entrevistas Torres story-based, semana del 10 ene" oninput="storeEvi('problem_where',this.value)"></div>
+      <div class="evi-row"><div class="evi-lbl">¿Qué evidencia falta?</div><input class="evi-inp" placeholder="Ej: falta validar en segmento enterprise" oninput="storeEvi('problem_gap',this.value)"></div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="qcard" id="qc-product">
+    <div class="qlbl">Q3 · Producto <span id="badge-product"></span></div>
+    <div class="qtext">¿El producto entrega valor real y genera retención?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('product','yes',this,'ok')"><div class="odot"></div>Sí — datos de recompra, uso post-compra, feedback positivo</button>
+      <button class="opt" onclick="sel('product','partial',this,'warn')"><div class="odot"></div>Parcial — algunos usan bien, hay churn o feedback inconsistente</button>
+      <button class="opt" onclick="sel('product','no',this,'block')"><div class="odot"></div>No — compra única, devoluciones, feedback negativo sistemático</button>
+      <button class="opt" onclick="sel('product','na',this,'ok')"><div class="odot"></div>Aún no hay producto lanzado</button>
+    </div>
+    <div class="evi-wrap" id="evi-product" style="display:none">
+      <div class="evi-row"><div class="evi-lbl">¿Qué dato lo prueba?</div><input class="evi-inp" placeholder="Ej: tasa de recompra 40%, NPS +32 en cohorte mes 1" oninput="storeEvi('product_proof',this.value)"></div>
+      <div class="evi-row"><div class="evi-lbl">¿Evidencia faltante?</div><input class="evi-inp" placeholder="Ej: no tenemos datos de uso post-compra sistematizados" oninput="storeEvi('product_gap',this.value)"></div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="qcard" id="qc-icp">
+    <div class="qlbl">Q4 · ICP <span id="badge-icp"></span></div>
+    <div class="qtext">¿Está definido quién compra con criterios accionables?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('icp','defined',this,'ok')"><div class="odot"></div>Sí — ventas puede calificar un prospecto en la primera llamada</button>
+      <button class="opt" onclick="sel('icp','partial',this,'warn')"><div class="odot"></div>Parcial — hay un perfil genérico pero no accionable</button>
+      <button class="opt" onclick="sel('icp','no',this,'warn')"><div class="odot"></div>No — atraemos clientes incorrectos consistentemente</button>
+    </div>
+    <div class="evi-wrap" id="evi-icp" style="display:none">
+      <div class="evi-row"><div class="evi-lbl">¿Cómo lo definiste?</div><input class="evi-inp" placeholder="Ej: Dunford paso 1, patrones en 8 mejores clientes" oninput="storeEvi('icp_source',this.value)"></div>
+      <div class="evi-row"><div class="evi-lbl">¿Qué criterio usa ventas para calificar?</div><input class="evi-inp" placeholder="Ej: CFO fintech LATAM, +$500k volumen mensual cripto" oninput="storeEvi('icp_criteria',this.value)"></div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="qcard" id="qc-pos">
+    <div class="qlbl">Q5 · Posicionamiento <span id="badge-pos"></span></div>
+    <div class="qtext">¿El mercado correcto entiende el valor inmediatamente?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('positioning','clear',this,'ok')"><div class="odot"></div>Sí — sin confusión en primeras conversaciones, no comparamos por precio</button>
+      <button class="opt" onclick="sel('positioning','unclear',this,'warn')"><div class="odot"></div>No del todo — hay confusión o nos comparan por precio frecuentemente</button>
+      <button class="opt" onclick="sel('positioning','broken',this,'warn')"><div class="odot"></div>No — cada equipo describe el producto de forma distinta</button>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="qcard" id="qc-model">
+    <div class="qlbl">Q6 · Modelo de negocio <span id="badge-model"></span></div>
+    <div class="qtext">¿La estructura es rentable?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('model','yes',this,'ok')"><div class="odot"></div>Sí — CAC &lt; LTV, margen claro, payback period conocido</button>
+      <button class="opt" onclick="sel('model','unclear',this,'warn')"><div class="odot"></div>No lo sé — nunca lo calculé formalmente</button>
+      <button class="opt" onclick="sel('model','no',this,'block')"><div class="odot"></div>No — CAC ≥ LTV o ventas no escalan financieramente</button>
+    </div>
+    <div class="evi-wrap" id="evi-model" style="display:none">
+      <div class="evi-row"><div class="evi-lbl">CAC estimado / LTV estimado</div><input class="evi-inp" placeholder="Ej: CAC $800 MXN, LTV $6,400 MXN, payback 3 meses" oninput="storeEvi('model_numbers',this.value)"></div>
+    </div>
+  </div>
+
+  <div class="skip-bar">
+    <span>¿Fundación validada? Puedes ir directo al diagnóstico de marketing.</span>
+    <button class="skip-btn" onclick="skipToMkt()">Saltar al Paso 2 →</button>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-p" onclick="goToMkt()" id="btn-to-mkt">Continuar a Marketing →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PANEL 1 — MARKETING ═══════════════ -->
+<div class="panel" id="p1">
+  <div class="eyebrow">Paso 1 · Solo si la fundación está validada</div>
+  <div class="stitle">Diagnóstico de Marketing</div>
+  <div class="sdesc">Identifica el cuello de botella específico. Regla: un solo problema dominante por ciclo. Sin evidencia no hay diagnóstico — hay opinión.</div>
+
+  <!-- Q7 -->
+  <div class="qcard" id="qc-bn">
+    <div class="qlbl">Q7 · Cuello de botella</div>
+    <div class="qtext">¿Dónde se rompe el funnel principalmente?</div>
+    <div class="qhint">Si hay múltiples roturas, elige la de mayor impacto en el negocio ahora.</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('bottleneck','reach',this,'ok')"><div class="odot"></div><strong style="color:var(--bl-t)">Alcance</strong> — poca visibilidad, el ICP no nos encuentra</button>
+      <button class="opt" onclick="sel('bottleneck','conversion',this,'ok')"><div class="odot"></div><strong style="color:var(--a-t)">Conversión</strong> — hay tráfico o leads pero no cierran</button>
+      <button class="opt" onclick="sel('bottleneck','retention',this,'ok')"><div class="odot"></div><strong style="color:var(--g-t)">Retención</strong> — clientes no vuelven o hay churn alto</button>
+      <button class="opt" onclick="sel('bottleneck','monetization',this,'ok')"><div class="odot"></div><strong style="color:var(--gr-t)">Monetización</strong> — ticket o LTV bajo</button>
+      <button class="opt" onclick="sel('bottleneck','unknown',this,'warn')"><div class="odot"></div>No sé — no tengo claridad sobre dónde está la caída</button>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="qcard" id="qc-fdata">
+    <div class="qlbl">Q8 · Datos del funnel</div>
+    <div class="qtext">¿Tienes datos para sostener esa lectura?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('funnelData','yes',this,'ok')"><div class="odot"></div>Sí — métricas de al menos 2 etapas del funnel</button>
+      <button class="opt" onclick="sel('funnelData','partial',this,'warn')"><div class="odot"></div>Parcial — tengo algo pero no es sistemático</button>
+      <button class="opt" onclick="sel('funnelData','no',this,'warn')"><div class="odot"></div>No — operando sin datos de funnel</button>
+    </div>
+    <div class="evi-wrap">
+      <div class="evi-row"><div class="evi-lbl">¿Qué dato específico tienes? (tasa, número, período)</div>
+      <input class="evi-inp" id="inp-funnel-data" placeholder="Ej: CTR landing 2.1%, conversión lead→demo 8%, cierre 14% — últimas 6 semanas" oninput="storeEvi('funnel_data',this.value)"></div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="qcard" id="qc-cause">
+    <div class="qlbl">Q9 · Causa probable</div>
+    <div class="qtext">¿Cuál crees que es la causa del cuello de botella?</div>
+    <div class="qhint">Sé específica. Esto va directo a la hipótesis.</div>
+    <div id="cause-hints" style="display:none;margin-top:.75rem;margin-bottom:.5rem">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);margin-bottom:.4rem;font-family:'DM Mono',monospace;">Causas frecuentes según tu cuello de botella — toca para insertar</div>
+      <div id="cause-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.5rem"></div>
+      <div id="cause-diag" style="font-size:11px;color:var(--acc);font-style:italic;padding:.35rem .6rem;background:var(--acc-t);border-radius:6px;line-height:1.5;"></div>
+    </div>
+    <textarea class="evi-inp" id="inp-cause" placeholder="Ej: el mensaje no resuena con el ICP porque está centrado en features, no en outcomes. Los leads llegan pero no entienden el valor antes de la demo." oninput="S.cause=this.value" style="margin-top:.5rem"></textarea>
+  </div>
+
+  <!-- Q10 -->
+  <div class="qcard" id="qc-action">
+    <div class="qlbl">Q10 · Acción concreta</div>
+    <div class="qtext">¿Qué acción específica vas a ejecutar?</div>
+    <div class="qhint">Una acción principal. Máximo 2 secundarias.</div>
+    <div id="action-hints" style="display:none;margin-top:.75rem;margin-bottom:.5rem">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);margin-bottom:.4rem;font-family:'DM Mono',monospace;">Acciones concretas válidas — toca para insertar</div>
+      <div id="action-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.5rem"></div>
+      <div id="action-rule" style="font-size:11px;color:var(--t2);padding:.35rem .6rem;background:var(--surf2);border-radius:6px;line-height:1.5;border:.5px solid var(--bor);">Filtro: ¿una sola cosa? ¿entregable concreto? ¿cabe en el sprint? ¿métrica binaria?</div>
+    </div>
+    <textarea class="evi-inp" id="inp-action" placeholder="Ej: reconstruir la sales story de Dunford centrando los temas de valor en outcomes del cliente, testear en las próximas 3 conversaciones." oninput="S.action=this.value" style="margin-top:.5rem"></textarea>
+  </div>
+
+  <!-- Q11 -->
+  <div class="qcard" id="qc-metric">
+    <div class="qlbl">Q11 · Métrica de éxito</div>
+    <div class="qtext">¿Qué número valida o refuta la hipótesis?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('metric','winrate',this,'ok')"><div class="odot"></div>Win rate — % deals ganados vs. perdidos</button>
+      <button class="opt" onclick="sel('metric','ctr',this,'ok')"><div class="odot"></div>CTR / tasa de conversión por etapa</button>
+      <button class="opt" onclick="sel('metric','churn',this,'ok')"><div class="odot"></div>Churn / tasa de recompra</button>
+      <button class="opt" onclick="sel('metric','ticket',this,'ok')"><div class="odot"></div>Ticket promedio / LTV</button>
+      <button class="opt" onclick="sel('metric','custom',this,'ok')"><div class="odot"></div>Otra — la defino en el output</button>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="qcard" id="qc-sprint">
+    <div class="qlbl">Q12 · Sprint</div>
+    <div class="qtext">¿Cuánto tiempo para testear la hipótesis?</div>
+    <div class="opts">
+      <button class="opt" onclick="sel('sprint','1w',this,'ok')"><div class="odot"></div>1 semana — acción rápida, feedback inmediato</button>
+      <button class="opt" onclick="sel('sprint','2w',this,'ok')"><div class="odot"></div>2 semanas — tiempo estándar</button>
+      <button class="opt" onclick="sel('sprint','4w',this,'ok')"><div class="odot"></div>4 semanas — ciclo más largo, mercado más lento</button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-g" onclick="go(0)">← Fundación</button>
+    <button class="btn btn-p" onclick="genOutput()">Generar Output →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PANEL 2 — OUTPUT ═══════════════ -->
+<div class="panel" id="p2">
+  <div class="out-hdr">
+    <div class="out-icon">◈</div>
+    <div>
+      <div class="out-stamp" id="out-stamp">—</div>
+      <div class="out-name">Brief de Diagnóstico ATLAS</div>
+    </div>
+  </div>
+
+  <!-- SCORE DASHBOARD -->
+  <div class="score-dash ob">
+    <div class="score-cell">
+      <div class="sc-label">Score fundación</div>
+      <div class="sc-val" id="dash-score" style="color:var(--t3)">—</div>
+      <div class="sc-sub" id="dash-level">Sin datos</div>
+      <div class="verdict-bar"><div class="verdict-fill" id="dash-bar" style="width:0%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="sc-label">Riesgo</div>
+      <div class="sc-val" id="dash-risk" style="font-size:14px;margin-top:4px">—</div>
+      <div class="sc-sub" id="dash-action-label">—</div>
+    </div>
+    <div class="score-cell">
+      <div class="sc-label">Cuello de botella</div>
+      <div class="sc-val" id="dash-bn" style="font-size:14px;margin-top:4px">—</div>
+      <div class="sc-sub" id="dash-sprint-label">—</div>
+    </div>
+  </div>
+
+  <!-- 01 DIAGNÓSTICO -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">01 · Diagnóstico</span><button class="cp-btn" onclick="cpBlock('blk-diag')">Copiar</button></div>
+    <div id="blk-diag">
+      <div class="os"><div class="ok-key">Etapa de empresa</div><div class="ok-val" id="o-stage">—</div></div>
+      <div class="os"><div class="ok-key">Estado de fundación</div><div class="ok-val" id="o-found">—</div></div>
+      <div class="os"><div class="ok-key">Cuello de botella</div><div class="ok-val" id="o-bn">—</div></div>
+      <div class="os"><div class="ok-key">Datos disponibles</div><div class="ok-val" id="o-fdata">—</div></div>
+    </div>
+  </div>
+
+  <!-- 02 PROBLEMA DOMINANTE -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">02 · Problema dominante</span><button class="cp-btn" onclick="cpBlock('blk-problem')">Copiar</button></div>
+    <div id="blk-problem">
+      <div class="os"><div class="ok-key">Problema</div><div class="ok-val" id="o-problem">—</div></div>
+      <div class="os"><div class="ok-key">Causa probable</div><div class="ok-val" id="o-cause">—</div></div>
+      <div class="os"><div class="ok-key">Evidencia disponible</div><div class="ok-val" id="o-evidence">—</div></div>
+      <div class="os"><div class="ok-key">Evidencia faltante</div><div class="ok-val" id="o-evigap">—</div></div>
+      <div class="os"><div class="ok-key">Riesgo si no se resuelve</div><div class="ok-val" id="o-risk">—</div></div>
+    </div>
+  </div>
+
+  <!-- 03 AMPLIFY ROUTING -->
+  <div class="amp-card" id="blk-amplify">
+    <div class="ob-head"><span class="ob-lbl" style="color:var(--acc)">03 · AMPLIFY Routing</span><button class="cp-btn" onclick="cpBlock('amp-content')">Copiar</button></div>
+    <div id="amp-content">
+      <div class="amp-layer" id="o-layer">—</div>
+      <div class="amp-sub" id="o-steps">—</div>
+      <div class="ok-key" style="margin-bottom:.4rem">Frameworks a activar</div>
+      <div class="fw-list" id="o-frameworks"></div>
+      <div class="ok-key" style="margin-top:1rem;margin-bottom:.4rem">Razonamiento</div>
+      <div style="font-size:12.5px;color:var(--t2);line-height:1.65" id="o-rationale">—</div>
+    </div>
+  </div>
+
+  <!-- 04 HIPÓTESIS -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">04 · Hipótesis de trabajo</span><button class="cp-btn" onclick="cpBlock('blk-hyp')">Copiar</button></div>
+    <div id="blk-hyp">
+      <div class="hyp" id="o-hyp">—</div>
+    </div>
+  </div>
+
+  <!-- 05 ACCIÓN + HERRAMIENTA -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">05 · Acción recomendada</span><button class="cp-btn" onclick="cpBlock('blk-action')">Copiar</button></div>
+    <div id="blk-action">
+      <div class="os"><div class="ok-key">Acción principal</div><div class="ok-val" id="o-action">—</div></div>
+      <div class="os"><div class="ok-key">Métrica de éxito</div><div class="ok-val" id="o-metric">—</div></div>
+      <div class="os"><div class="ok-key">Sprint</div><div class="ok-val" id="o-sprint">—</div></div>
+      <div class="os"><div class="ok-key">Herramienta sugerida</div><div class="ok-val" id="o-tools">—</div></div>
+    </div>
+  </div>
+
+  <!-- 06 PLAYBOOK -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">06 · Playbook recomendado</span><button class="cp-btn" onclick="cpBlock('blk-pb')">Copiar</button></div>
+    <div id="blk-pb"></div>
+  </div>
+
+  <!-- 07 FUNNEL ATLAS -->
+  <div class="atlas-cta">
+    <div class="atlas-icon">⬡</div>
+    <div class="atlas-txt">
+      <div class="atlas-lbl">Siguiente sistema</div>
+      <div class="atlas-title">Funnel Atlas 2026</div>
+      <div class="atlas-desc" id="o-atlas">—</div>
+      <div style="font-size:10.5px;color:var(--te-t);margin-top:.35rem;opacity:.8">El cuello de botella y la etapa se pasan como contexto — el Atlas pre-selecciona el objetivo correspondiente.</div>
+    </div>
+    <button class="btn btn-teal" onclick="openAtlas()">Abrir Atlas →</button>
+  </div>
+
+  <!-- BRIEF COMPLETO -->
+  <div class="ob">
+    <div class="ob-head"><span class="ob-lbl">Brief completo</span><button class="cp-btn" id="cp-all-btn" onclick="cpAll()">Copiar todo</button></div>
+    <div style="font-size:12px;color:var(--t3);line-height:1.6">Texto plano listo para Notion, Slack o cualquier herramienta de trabajo.</div>
+  </div>
+
+  <div class="restart-row">
+    <button class="btn btn-g" onclick="restart()">← Nuevo diagnóstico</button>
+  </div>
+</div>
+<!-- ═══════════════ PANEL 3 — TEORÍA ═══════════════ -->
+<div class="panel" id="p3">
+  <div class="eyebrow">Referencia · Consulta en cualquier momento</div>
+  <div class="stitle">Teoría detrás del diagnóstico</div>
+  <div class="sdesc">Contenido operativo para entender qué evalúa cada sección de ATLAS y qué hacer cuando algo falla. No es lectura obligatoria — es referencia.</div>
+
+  <!-- SUB-TABS -->
+  <div class="ref-subtabs">
+    <button class="ref-subtab active" onclick="showRef('ref-fund',this)">Diagnóstico de fundación</button>
+    <button class="ref-subtab" onclick="showRef('ref-mkt',this)">Diagnóstico de marketing</button>
+  </div>
+
+  <!-- ── SUB-PANEL: FUNDACIÓN ── -->
+  <div id="ref-fund" class="ref-subpanel active">
+
+    <div class="ref-block" style="border-left-color:var(--b-blue-t)">
+      <div class="ref-eyebrow" style="color:var(--b-blue-t)">Paso 0 — Antes de tocar marketing</div>
+      <div class="ref-title">Propósito</div>
+      <div class="ref-body">Determina si el problema está en la estructura del negocio, no en el marketing. Aplicar marketing a un problema de fundación produce ruido, no resultados. Esta herramienta se corre primero, siempre.</div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Etapas de la empresa</div>
+      <div class="ref-title">Clasifica el momento antes de evaluar</div>
+      <div class="ref-body">La etapa determina qué buscar. Una empresa en hipótesis no tiene problema de canal — no ha llegado a ese punto.</div>
+      <div class="ref-errors">
+        <div class="ref-error-row">
+          <div class="ref-error-label">Hipótesis / pre-revenue</div>
+          <div class="ref-error-body">¿Hay clientes pagando? No. Prioridad: validar problema y propuesta de valor.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Early adopters / tracción</div>
+          <div class="ref-error-body">Primeros clientes. El foco es entender por qué compran y retenerlos.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Crecimiento / escalando</div>
+          <div class="ref-error-body">Hay ventas repetibles. El problema es convertir a early majority.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Empresa mediana o consolidada</div>
+          <div class="ref-error-body">Sistema existente. El problema es optimizar, no construir desde cero.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--red)">
+      <div class="ref-eyebrow" style="color:var(--red)">Matriz de validación de fundación</div>
+      <div class="ref-title">Área · Diagnóstico · Evidencia · Acción si falla</div>
+      <div class="ref-body" style="margin-bottom:.75rem">Fuentes: Osterwalder &amp; Pigneur, Value Proposition Design · Ries, The Lean Startup · Torres, Continuous Discovery Habits</div>
+      <div class="ref-errors">
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label" style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">Área</div>
+          <div class="ref-error-label" style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">Diagnóstico</div>
+          <div class="ref-error-label" style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">Evidencia mínima</div>
+          <div class="ref-error-label" style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">Acción si falla</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">Problema <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--red);background:var(--r-bg);padding:1px 5px;border-radius:4px;font-weight:400">crítico</span></div>
+          <div class="ref-error-body">¿Existe una necesidad real activa? Señal de fallo: indiferencia del mercado.</div>
+          <div class="ref-error-body">5+ entrevistas con ICP · búsquedas activas · clientes usando alternativas imperfectas</div>
+          <div class="ref-error-body">Redefinir el problema con entrevistas reales (Torres — story-based interviewing)</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">Producto <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--red);background:var(--r-bg);padding:1px 5px;border-radius:4px;font-weight:400">crítico</span></div>
+          <div class="ref-error-body">¿Entrega valor real y genera retención? Señal de fallo: compra única, devoluciones.</div>
+          <div class="ref-error-body">Datos de recompra · tasa de uso post-compra · feedback directo</div>
+          <div class="ref-error-body">Mejorar solución antes de cualquier acción de marketing</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">Mercado <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--red);background:var(--r-bg);padding:1px 5px;border-radius:4px;font-weight:400">crítico</span></div>
+          <div class="ref-error-body">¿Hay demanda activa sin educar demasiado? Señal de fallo: ciclos de venta inexplicablemente largos.</div>
+          <div class="ref-error-body">Volumen de búsqueda · competencia con tracción · clientes pagando por similares</div>
+          <div class="ref-error-body">Pivot o cambio de segmento — decisión de negocio, no de marketing</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">ICP <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--amber);background:var(--a-bg);padding:1px 5px;border-radius:4px;font-weight:400">alto</span></div>
+          <div class="ref-error-body">¿Definido con criterios accionables? Señal de fallo: atraes clientes incorrectos.</div>
+          <div class="ref-error-body">Patrón en mejores clientes: quiénes son, por qué compran, qué tienen en común</div>
+          <div class="ref-error-body">Redefinir segmento (Dunford paso 1 + Lauchengco ICP)</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">Posicionamiento <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--amber);background:var(--a-bg);padding:1px 5px;border-radius:4px;font-weight:400">alto</span></div>
+          <div class="ref-error-body">¿El mercado correcto entiende el valor inmediatamente? Señal de fallo: comparaciones por precio.</div>
+          <div class="ref-error-body">Sin confusión en primeras conversaciones · no comparado solo por precio</div>
+          <div class="ref-error-body">Proceso de posicionamiento Dunford (10 pasos)</div>
+        </div>
+        <div class="ref-error-row" style="grid-template-columns:90px 1fr 1fr 1fr">
+          <div class="ref-error-label">Modelo <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--red);background:var(--r-bg);padding:1px 5px;border-radius:4px;font-weight:400">crítico</span></div>
+          <div class="ref-error-body">¿Es rentable la estructura? Señal de fallo: CAC &gt; LTV.</div>
+          <div class="ref-error-body">CAC calculado · LTV estimado · margen por venta · payback period</div>
+          <div class="ref-error-body">Rediseñar pricing o estructura — decisión de negocio</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Regla de salida</div>
+      <div class="ref-errors">
+        <div class="ref-error-row">
+          <div class="ref-error-label" style="color:var(--red)">crítico fallando</div>
+          <div class="ref-error-body">Detener marketing. Resolver fundación primero.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label" style="color:var(--amber)">alto fallando</div>
+          <div class="ref-error-body">Ajustar antes de escalar. El marketing aquí es estratégico, no táctico.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label" style="color:var(--b-blue-t)">medio fallando</div>
+          <div class="ref-error-body">Optimizable con acciones de marketing dirigidas.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label" style="color:var(--green)">todo ok</div>
+          <div class="ref-error-body">Pasa al diagnóstico de marketing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Herramientas según tipo de problema</div>
+      <div class="ref-fw-grid">
+        <div class="ref-fw-card" style="border-color:rgba(226,75,74,0.3)">
+          <div class="ref-fw-name" style="color:var(--red)">Producto o propuesta de valor</div>
+          <div class="ref-fw-when">Value Proposition Canvas — Osterwalder<br>OST + entrevistas story-based — Torres<br>The Mom Test — Fitzpatrick: validar sin sesgo</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(229,185,122,0.3)">
+          <div class="ref-fw-name" style="color:var(--amber)">Mercado o segmento</div>
+          <div class="ref-fw-when">Cabeza de playa — Moore: nicho antes de escalar<br>Blue Ocean Canvas — Kim &amp; Mauborgne<br>Five Forces — Porter: contexto competitivo</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(55,138,221,0.3)">
+          <div class="ref-fw-name" style="color:var(--b-blue-t)">Posicionamiento</div>
+          <div class="ref-fw-when">Proceso completo de 10 pasos — Dunford<br>Positioning Canvas con alternativas reales</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(255,255,255,0.1)">
+          <div class="ref-fw-name">Modelo de negocio</div>
+          <div class="ref-fw-when">Business Model Canvas — Osterwalder<br>Unit economics: CAC, LTV, payback period</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ref-fund -->
+
+  <!-- ── SUB-PANEL: MARKETING ── -->
+  <div id="ref-mkt" class="ref-subpanel">
+
+    <div class="ref-block" style="border-left-color:var(--te-t)">
+      <div class="ref-eyebrow" style="color:var(--te-t)">Paso 1 — Solo si la fundación está validada</div>
+      <div class="ref-title">Propósito</div>
+      <div class="ref-body">Identifica el cuello de botella específico dentro del marketing. La regla central: un solo problema dominante por ciclo. El sistema existe para eliminar ruido, no para crear más análisis.</div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Localiza el cuello de botella en el funnel</div>
+      <div class="ref-title">Dónde está cayendo el negocio</div>
+      <div class="ref-body" style="margin-bottom:.75rem">Fuentes: Lean Analytics — Croll &amp; Yoskovitz · Hacking Growth — Ellis &amp; Brown</div>
+      <div class="ref-errors">
+        <div class="ref-error-row">
+          <div class="ref-error-label">Alcance</div>
+          <div class="ref-error-body">Tráfico, impresiones, views. Caída aquí: no hay visibilidad con el ICP correcto.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Leads / interés</div>
+          <div class="ref-error-body">Conversión de alcance a prospecto. Caída aquí: hay tráfico pero no interés activo — el mensaje no resuena.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Ventas / cierre</div>
+          <div class="ref-error-body">Cierre de deal. Caída aquí: la oferta no convence o la propuesta de valor no es clara.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Retención</div>
+          <div class="ref-error-body">Recompra, churn. Caída aquí: mala experiencia post-compra o bajo valor percibido continuo.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Ticket / LTV</div>
+          <div class="ref-error-body">Ingreso medio por cliente. Caída aquí: monetización débil, sin upsell o posicionamiento no diferenciado.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Palancas por cuello de botella</div>
+      <div class="ref-title">Qué accionar según dónde está el problema</div>
+      <div class="ref-body" style="margin-bottom:.75rem">Fuentes: Building a StoryBrand — Miller · Hooked — Eyal · Influence — Cialdini</div>
+      <div class="ref-errors">
+        <div class="ref-error-row">
+          <div class="ref-error-label">Captación</div>
+          <div class="ref-error-body">Contenido con distribución activa, ads, SEO, partnerships, outreach directo al ICP. KPI: alcance calificado · CTR.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Conversión</div>
+          <div class="ref-error-body">Oferta, copy, CTA, landing, demo, sales story (Dunford). El mensaje debe hablar al ICP exacto. KPI: % conversión por etapa.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Retención</div>
+          <div class="ref-error-body">Onboarding, email de activación, comunidad, seguimiento. Lauchengco: lifecycle es un rol PMM separado. KPI: tasa de recompra · churn.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Monetización</div>
+          <div class="ref-error-body">Pricing, upsell, bundles, expansión de cuenta. Requiere claridad de propuesta de valor diferenciada. KPI: ticket promedio · LTV.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Posicionamiento</div>
+          <div class="ref-error-body">ICP, narrativa, categoría de mercado. Solo cuando todo lo anterior falla por falta de claridad, no de ejecución.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Formato de salida por ciclo</div>
+      <div class="ref-title">Qué produce el diagnóstico de marketing</div>
+      <div class="ref-body" style="margin-bottom:.75rem">Fuentes: Essentialism — McKeown · Measure What Matters — Doerr</div>
+      <div class="ref-errors">
+        <div class="ref-error-row">
+          <div class="ref-error-label">Problema dominante</div>
+          <div class="ref-error-body">Un solo enunciado concreto. No "mejorar marketing" — "baja conversión de lead a cierre en ciclo actual".</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Hipótesis</div>
+          <div class="ref-error-body">Causa probable con evidencia mínima (datos, entrevistas, patrón observado).</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Acciones</div>
+          <div class="ref-error-body">Máximo 3 acciones por sprint. Cada una con canal, formato y KPI asociado.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Métrica de éxito</div>
+          <div class="ref-error-body">Una métrica principal que valide o refute la hipótesis. Outcome, no output.</div>
+        </div>
+        <div class="ref-error-row">
+          <div class="ref-error-label">Sprint</div>
+          <div class="ref-error-body">1–2 semanas. Al cierre: funcionó / no funcionó / ajuste.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-block" style="border-left-color:var(--bor2)">
+      <div class="ref-eyebrow">Herramientas según cuello de botella</div>
+      <div class="ref-fw-grid">
+        <div class="ref-fw-card" style="border-color:rgba(55,138,221,0.3)">
+          <div class="ref-fw-name" style="color:var(--b-blue-t)">Captación débil</div>
+          <div class="ref-fw-when">Traction — Weinberg &amp; Mares: 19 canales de adquisición<br>Content-market fit: ¿el contenido habla al ICP correcto?</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(229,185,122,0.3)">
+          <div class="ref-fw-name" style="color:var(--amber)">Conversión débil</div>
+          <div class="ref-fw-when">Sales story — Dunford: estructura de pitch<br>SB7 framework — Miller: narrativa centrada en cliente<br>Battle cards + objection handling — Lauchengco</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(122,173,122,0.3)">
+          <div class="ref-fw-name" style="color:var(--green)">Retención débil</div>
+          <div class="ref-fw-when">Hook Model — Eyal: trigger, action, reward, investment<br>Onboarding + lifecycle PMM — Lauchengco</div>
+        </div>
+        <div class="ref-fw-card" style="border-color:rgba(255,255,255,0.1)">
+          <div class="ref-fw-name">Sin claridad en cuello de botella</div>
+          <div class="ref-fw-when">Win/loss analysis: revisar deals perdidos sistemáticamente<br>Experience Map — Torres: mapear experiencia actual del cliente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-note">Sin evidencia no hay diagnóstico. Evidencia mínima aceptable: datos de funnel, 3+ entrevistas, patrón de deals perdidos, feedback directo de clientes. La intuición puede señalar dónde mirar — no puede reemplazar lo que encuentras cuando miras.</div>
+
+  </div><!-- /ref-mkt -->
+
+  <div class="nav-row" style="margin-top:1.5rem">
+    <button class="btn btn-g" onclick="goBack()">← Volver al diagnóstico</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PANEL 4 — HIPÓTESIS ═══════════════ -->
+<div class="panel" id="p4">
+  <div class="eyebrow">Referencia · Consulta en cualquier momento</div>
+  <div class="stitle">Cómo llenar la hipótesis</div>
+  <div class="sdesc">Si no sabes qué escribir en causa probable o en acción concreta, aquí está el desglose variable por variable con ejemplos reales. La hipótesis tiene que estar lista antes de generar el output.</div>
+
+  <!-- VAR 1 -->
+  <div class="ref-block" style="border-left-color:var(--acc)">
+    <div class="ref-eyebrow" style="color:var(--acc)">Variable 1</div>
+    <div class="ref-title">Problema específico — el síntoma observable en el funnel</div>
+    <div class="hyp-ref-table">
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Alcance</div>
+        <div class="hyp-ref-body">Baja visibilidad con el ICP — el segmento correcto no nos encuentra.<div class="hyp-ref-eg">"baja visibilidad con CFOs fintech LATAM — sin tráfico calificado"</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Conversión leads</div>
+        <div class="hyp-ref-body">Leads entran pero sin interés activo — el mensaje no resuena antes del primer contacto.<div class="hyp-ref-eg">"baja tasa de respuesta en outreach inicial — 4% vs. 15% esperado"</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Conversión cierre</div>
+        <div class="hyp-ref-body">El ICP llega a la demo pero no cierra — la oferta no convence o hay confusión de valor.<div class="hyp-ref-eg">"conversión de demo a cierre del 8% cuando el benchmark del segmento es 20–25%"</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Retención</div>
+        <div class="hyp-ref-body">Clientes compran pero no vuelven o abandonan antes de obtener valor real.<div class="hyp-ref-eg">"churn del 40% antes del mes 3 — ciclo de vida promedio de 2.1 meses"</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Monetización</div>
+        <div class="hyp-ref-body">Clientes activos pero ticket muy por debajo del potencial del segmento.<div class="hyp-ref-eg">"ticket promedio $X cuando el ICP tiene capacidad documentada de $3X"</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VAR 2 -->
+  <div class="ref-block" style="border-left-color:var(--b-blue-t)">
+    <div class="ref-eyebrow" style="color:var(--b-blue-t)">Variable 2</div>
+    <div class="ref-title">Causa probable — cómo determinarla si no tienes datos</div>
+    <div class="ref-body" style="margin-bottom:.75rem">Revisa en este orden: (1) deals perdidos en los últimos 60 días — ¿qué dijeron o no dijeron? (2) feedback de clientes que sí compraron — ¿por qué eligieron? (3) tu proceso de venta — ¿dónde se cae la conversación? Si no tienes nada de esto, la causa es "sin datos suficientes" — y la acción concreta es conseguir esos datos primero.</div>
+    <div class="hyp-ref-table">
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Alcance</div>
+        <div class="hyp-ref-body">Contenido centrado en el producto, no en el dolor / canal incorrecto para el segmento / sin distribución activa, solo publicación.<div class="hyp-ref-eg">"porque el contenido está centrado en el producto, no en el problema que el ICP tiene activo"</div><div class="hyp-ref-diag">Pregúntate: ¿el ICP busca activamente esto? ¿Dónde consume contenido tu segmento?</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Conversión</div>
+        <div class="hyp-ref-body">Pitch en features, no en outcomes / ICP no entiende el valor antes de la demo / sin respuesta a objeciones frecuentes.<div class="hyp-ref-eg">"porque el pitch describe funcionalidades pero no articula el resultado que el cliente obtiene"</div><div class="hyp-ref-diag">Pregúntate: ¿qué dijeron los deals perdidos? ¿El ICP puede explicar el valor con sus palabras?</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Retención</div>
+        <div class="hyp-ref-body">El cliente no llega al primer valor concreto rápido / sin onboarding estructurado / ausencia de trigger de regreso (Eyal).<div class="hyp-ref-eg">"porque no hay un momento de éxito definido en los primeros 14 días post-compra"</div><div class="hyp-ref-diag">Pregúntate: ¿cuántos días entre la compra y el primer uso real? ¿Qué hace el cliente en los primeros 7 días?</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Monetización</div>
+        <div class="hyp-ref-body">Posicionamiento no diferenciado / sin tier de alto valor / upsell no vinculado a un momento de éxito del cliente.<div class="hyp-ref-eg">"porque no hay una oferta de expansión para clientes que ya alcanzaron el resultado principal"</div><div class="hyp-ref-diag">Pregúntate: ¿quién paga más y por qué? ¿Hay más perfiles como ellos? ¿Existe upsell disponible?</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VAR 3 -->
+  <div class="ref-block" style="border-left-color:var(--green)">
+    <div class="ref-eyebrow" style="color:var(--green)">Variable 3</div>
+    <div class="ref-title">Acción concreta — filtro antes de escribirla</div>
+    <div class="ref-filter">
+      <div class="ref-filter-item"><span class="ref-filter-num">1</span><span>¿Es una sola cosa? Si tiene "y además" en el medio, son dos acciones.</span></div>
+      <div class="ref-filter-item"><span class="ref-filter-num">2</span><span>¿Tiene un entregable visible al final? (un documento, un cambio en el canal, una conversación grabada)</span></div>
+      <div class="ref-filter-item"><span class="ref-filter-num">3</span><span>¿Cabe en el sprint definido? Si no, partir en fases.</span></div>
+      <div class="ref-filter-item"><span class="ref-filter-num">4</span><span>¿La métrica dice sí o no claramente? Evitar métricas de vanidad.</span></div>
+    </div>
+    <div class="hyp-ref-table" style="margin-top:.75rem">
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Alcance</div>
+        <div class="hyp-ref-body">Publicar 3 piezas en [canal] con ángulo centrado en [dolor ICP] y medir CTR real.<br>Outreach directo a 15 perfiles calificados con mensaje de problema específico.<div class="hyp-ref-eg">"publicar 2 hilos en LinkedIn sobre [problema ICP] con distribución activa en 3 comunidades target"</div><div class="hyp-ref-bad">No válido: "mejorar presencia en redes" — sin canal, sin formato, sin métrica.</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Conversión</div>
+        <div class="hyp-ref-body">Reescribir la sales story con formato Dunford y testear en 3 conversaciones reales.<br>Construir battle card para el competidor más frecuente en deals perdidos.<div class="hyp-ref-eg">"reconstruir sales story Dunford centrando temas de valor en outcomes del cliente, testear en próximas 3 demos"</div><div class="hyp-ref-bad">No válido: "mejorar el copy" — ¿qué copy, dónde, cómo se mide?</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Retención</div>
+        <div class="hyp-ref-body">Diseñar y enviar email de activación al día 3 post-compra con paso de valor concreto.<br>Hacer 5 entrevistas story-based con clientes que no volvieron en los últimos 90 días.<div class="hyp-ref-eg">"identificar el momento de éxito del producto y medir cuántos clientes actuales lo alcanzan en los primeros 14 días"</div><div class="hyp-ref-bad">No válido: "mejorar el onboarding" — ¿qué parte, qué cambio, qué mides?</div></div>
+      </div>
+      <div class="hyp-ref-row">
+        <div class="hyp-ref-label">Monetización</div>
+        <div class="hyp-ref-body">Identificar el 20% de clientes con mayor LTV y analizar qué comparten.<br>Proponer tier de precio superior a 3 clientes actuales y documentar la respuesta.<div class="hyp-ref-eg">"construir propuesta de upsell vinculada a resultado ya logrado y presentarla a 5 clientes activos este sprint"</div><div class="hyp-ref-bad">No válido: "aumentar el ticket" — ¿con qué mecanismo, con quién, en qué tiempo?</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJEMPLOS COMPLETOS -->
+  <div class="ref-block" style="border-left-color:var(--amber)">
+    <div class="ref-eyebrow" style="color:var(--amber)">Ejemplos completos</div>
+    <div class="ref-title">Hipótesis armadas por escenario</div>
+
+    <div class="hyp-ex">
+      <div class="hyp-ex-tag">Cuello: Conversión · B2B SaaS · Early adopters</div>
+      <div class="hyp-ex-body">
+        Creemos que <strong>la conversión de demo a cierre es del 8% cuando debería ser del 20–25%</strong><br>
+        porque <strong>el pitch describe funcionalidades pero no articula el outcome que el CFO obtiene en los primeros 90 días</strong><br>
+        por lo tanto vamos a <strong>reescribir la sales story con formato Dunford y testearla en las próximas 4 demos</strong><br>
+        para lograr <strong>subir la tasa de cierre a 15%+ en las siguientes 3 semanas</strong>
+      </div>
+      <div class="hyp-ex-bad">❌ Versión incorrecta: "Creemos que el marketing no está funcionando porque el mensaje no es bueno, por lo tanto vamos a mejorar la comunicación para tener más ventas." — Sin datos, sin causa específica, sin acción concreta, sin métrica.</div>
+    </div>
+
+    <div class="hyp-ex">
+      <div class="hyp-ex-tag">Cuello: Retención · Academia / Educación · Crecimiento</div>
+      <div class="hyp-ex-body">
+        Creemos que <strong>el 40% de los estudiantes abandona antes de completar el primer módulo</strong><br>
+        porque <strong>no hay un momento de éxito temprano definido — el primer resultado concreto llega en la semana 4, demasiado tarde</strong><br>
+        por lo tanto vamos a <strong>diseñar un "quick win" de 48h para nuevos inscritos y enviarlo por email el día 2</strong><br>
+        para lograr <strong>reducir el abandono en semana 1 de 40% a menos de 20% en el siguiente cohorte</strong>
+      </div>
+    </div>
+
+    <div class="hyp-ex">
+      <div class="hyp-ex-tag">Cuello: Alcance · Consultoría · Sin audiencia establecida</div>
+      <div class="hyp-ex-body">
+        Creemos que <strong>el ICP no nos encuentra porque no hay presencia donde busca activamente</strong><br>
+        porque <strong>el contenido actual está en Instagram (audiencia general) pero el ICP es CFO de fintech que consume LinkedIn y newsletters especializados</strong><br>
+        por lo tanto vamos a <strong>publicar 3 artículos en LinkedIn sobre [problema ICP] y hacer outreach directo a 20 perfiles calificados</strong><br>
+        para lograr <strong>generar 5 conversaciones calificadas en las próximas 2 semanas</strong>
+      </div>
+    </div>
+
+    <div class="ref-note">Señal de que la hipótesis está lista: puedes leerla en voz alta y cualquier persona del equipo entiende exactamente qué está fallando, por qué, qué van a hacer y cómo van a saber si funcionó.</div>
+  </div>
+
+  <div class="nav-row" style="margin-top:1.5rem">
+    <button class="btn btn-g" onclick="goBack()">← Volver al diagnóstico</button>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div class="stop" id="stop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────
+const S = {
+  stage:null,problem:null,product:null,icp:null,positioning:null,model:null,
+  bottleneck:null,funnelData:null,metric:null,sprint:null,
+  cause:'',action:'',skipped:false,
+  evi:{},
+  forced:false
+};
+
+// ─── THEME ───────────────────────────────────────────────
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('btnL').classList.toggle('on',t==='light');
+  document.getElementById('btnD').classList.toggle('on',t==='dark');
+  localStorage.setItem('atlas-theme',t);
+}
+const saved=localStorage.getItem('atlas-theme');
+if(saved)setTheme(saved);
+
+// ─── MANUAL ──────────────────────────────────────────────
+function openManual(){document.getElementById('manual-modal').classList.add('show')}
+function closeManual(){document.getElementById('manual-modal').classList.remove('show')}
+document.getElementById('manual-modal').addEventListener('click',function(e){if(e.target===this)closeManual()});
+
+// ─── NAVIGATION ──────────────────────────────────────────
+let cur=0;
+function go(i){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p'+i).classList.add('on');
+  document.querySelectorAll('.spill').forEach(p=>p.classList.remove('on'));
+  document.getElementById('nav'+i).classList.add('on');
+  cur=i;
+  const lbls=['Paso 1 de 3','Paso 2 de 3','Paso 3 de 3'];
+  document.getElementById('progLbl').textContent=lbls[i];
+  document.getElementById('pbFill').style.width=[33,66,100][i]+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tryNav(i){
+  if(document.getElementById('nav'+i).classList.contains('locked'))return;
+  go(i);
+}
+function unlock(i){document.getElementById('nav'+i).classList.remove('locked')}
+function markDone(i){document.getElementById('nav'+i).classList.add('done')}
+
+// Navegar a paneles de referencia (no afectan el flujo del diagnóstico)
+let prevPanel=0;
+function goRef(i){
+  prevPanel=cur;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p'+i).classList.add('on');
+  document.querySelectorAll('.spill').forEach(p=>p.classList.remove('on'));
+  document.getElementById('nav'+i).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goBack(){
+  go(prevPanel);
+  document.getElementById('nav'+prevPanel).classList.add('on');
+}
+function showRef(id,btn){
+  document.querySelectorAll('.ref-subpanel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ref-subtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── SCORE ENGINE ────────────────────────────────────────
+const SCORE_MAP={
+  problem:{validated:0,partial:-15,no:-30},
+  product:{yes:0,partial:-10,no:-30,na:0},
+  model:{yes:0,unclear:-10,no:-30},
+  icp:{defined:0,partial:-10,no:-15},
+  positioning:{clear:0,unclear:-8,broken:-15},
+  funnelData:{yes:0,partial:-5,no:-10}
+};
+
+function calcScore(){
+  let s=100;
+  ['problem','product','model','icp','positioning'].forEach(k=>{
+    if(S[k]&&SCORE_MAP[k]&&SCORE_MAP[k][S[k]]!==undefined)s+=SCORE_MAP[k][S[k]];
+  });
+  if(S.funnelData&&SCORE_MAP.funnelData[S.funnelData]!==undefined)s+=SCORE_MAP.funnelData[S.funnelData];
+  return Math.max(0,s);
+}
+
+function getScoreLevel(s){
+  if(s>=80)return{label:'Fundación OK',color:'var(--g-t)',bg:'var(--green)',verdict:'Proceder a marketing'};
+  if(s>=60)return{label:'Riesgo medio',color:'var(--a-t)',bg:'var(--amber)',verdict:'Ajustar antes de escalar'};
+  if(s>=40)return{label:'Riesgo alto',color:'#F59A5A',bg:'#F59A5A',verdict:'No escalar marketing aún'};
+  return{label:'Crítico',color:'var(--r-t)',bg:'var(--red)',verdict:'Detener marketing — resolver fundación'};
+}
+
+function updateScore(){
+  const score=calcScore();
+  const answeredAny=S.problem||S.product||S.model||S.icp||S.positioning;
+  if(!answeredAny){
+    document.getElementById('sc-num').textContent='—';
+    document.getElementById('sc-num').style.color='var(--t3)';
+    document.getElementById('sc-label').textContent='Sin datos aún';
+    document.getElementById('sc-label').style.color='var(--t3)';
+    document.getElementById('sc-bar').style.width='0%';
+    document.getElementById('sc-verdict').textContent='';
+    return;
+  }
+  const lv=getScoreLevel(score);
+  document.getElementById('sc-num').textContent=score;
+  document.getElementById('sc-num').style.color=lv.color;
+  document.getElementById('sc-label').textContent=lv.label;
+  document.getElementById('sc-label').style.color=lv.color;
+  document.getElementById('sc-bar').style.width=score+'%';
+  document.getElementById('sc-bar').style.background=lv.bg;
+  document.getElementById('sc-verdict').textContent=lv.verdict;
+}
+
+// ─── SELECTION ───────────────────────────────────────────
+function sel(key,val,btn,type){
+  btn.closest('.opts').querySelectorAll('.opt').forEach(b=>{
+    b.classList.remove('sel','sel-warn','sel-block');
+  });
+  const cls=type==='warn'?'sel-warn':type==='block'?'sel-block':'sel';
+  btn.classList.add(cls);
+  S[key]=val;
+  const card=btn.closest('.qcard');
+  card.classList.remove('ok','warn','block');
+  card.classList.add(type==='block'?'block':type==='warn'?'warn':'ok');
+
+  // show evidence fields
+  const eviId='evi-'+key;
+  const eviEl=document.getElementById(eviId);
+  if(eviEl){eviEl.style.display=(val!=='no'&&val!=='na')?'flex':'none';}
+
+  updateScore();
+  evaluateBlocker();
+  // Si se seleccionó cuello de botella, actualizar sugerencias en Q9 y Q10
+  if(key==='bottleneck') renderSuggestions(val);
+}
+
+function storeEvi(k,v){S.evi[k]=v;}
+
+// ─── SUGGESTION DATA ─────────────────────────────────
+const sugData={
+  reach:{
+    causes:[
+      'El contenido habla del producto, no del dolor del ICP',
+      'Estamos en el canal incorrecto para el segmento',
+      'Solo publicamos, no hay distribución activa',
+      'El mensaje es genérico — no diferenciado'
+    ],
+    causeDiag:'Pregúntate: ¿el ICP busca activamente esto? ¿Dónde consume contenido tu segmento?',
+    actions:[
+      'Publicar 3 piezas en [canal] centradas en [dolor ICP] y medir CTR',
+      'Outreach directo a 15 perfiles calificados del ICP con mensaje de problema',
+      'Testear un canal nuevo con un solo formato durante 2 semanas',
+      'Activar distribución activa en 3 comunidades donde está el ICP'
+    ]
+  },
+  conversion:{
+    causes:[
+      'El pitch describe features, no outcomes del cliente',
+      'El ICP no entiende el valor antes de la demo',
+      'No hay respuesta preparada para las objeciones frecuentes',
+      'Hay fricción en el proceso de contacto o cierre'
+    ],
+    causeDiag:'Pregúntate: ¿qué dijeron los deals perdidos? ¿El ICP puede explicar el valor del producto con sus palabras?',
+    actions:[
+      'Reescribir la sales story con formato Dunford y testear en 3 demos',
+      'Construir battle card para el competidor más frecuente en deals perdidos',
+      'Cambiar el CTA de [landing] a [acción específica] y medir tasa de contacto',
+      'Documentar y responder las 5 objeciones más frecuentes'
+    ]
+  },
+  retention:{
+    causes:[
+      'El cliente no llega al primer valor concreto rápido',
+      'No hay onboarding estructurado post-compra',
+      'El producto entrega menos de lo prometido en ventas',
+      'No hay trigger de regreso — ausencia de hábito (Eyal)'
+    ],
+    causeDiag:'Pregúntate: ¿cuántos días entre la compra y el primer uso real? ¿Qué hace el cliente en los primeros 7 días?',
+    actions:[
+      'Diseñar email de activación al día 3 post-compra con paso de valor concreto',
+      'Hacer 5 entrevistas story-based con clientes que no volvieron',
+      'Identificar el "momento de éxito" y medir cuántos clientes lo alcanzan',
+      'Definir los 3 comportamientos clave en los primeros 14 días y rastrearlos'
+    ]
+  },
+  monetization:{
+    causes:[
+      'El posicionamiento no diferencia — compiten por precio',
+      'No hay tier de alto valor para el segmento correcto',
+      'El upsell no está vinculado a un momento de éxito del cliente',
+      'El ICP con mayor LTV no está siendo priorizado'
+    ],
+    causeDiag:'Pregúntate: ¿quién paga más y por qué? ¿Hay más perfiles como ellos? ¿Existe una oferta de expansión?',
+    actions:[
+      'Identificar el 20% de clientes con mayor LTV y analizar qué comparten',
+      'Proponer tier de precio superior a 3 clientes actuales y documentar respuesta',
+      'Construir propuesta de upsell vinculada a resultado ya logrado por el cliente',
+      'Revisar temas de valor Dunford: ¿el segmento correcto está pagando por ellos?'
+    ]
+  },
+  unknown:{
+    causes:[
+      'Sin datos suficientes de funnel para confirmar',
+      'Múltiples cuellos de botella activos sin criterio de prioridad',
+      'El equipo tiene versiones distintas del problema'
+    ],
+    causeDiag:'Sin datos no hay causa — la acción es conseguir los datos primero. Revisar deals perdidos, entrevistas, métricas de funnel.',
+    actions:[
+      'Mapear Experience Map (Torres) con el equipo — versiones individuales primero',
+      'Revisar 10 deals perdidos recientes y documentar el patrón',
+      'Levantar datos mínimos de funnel: alcance → lead → cierre por período',
+      'Hacer 5 entrevistas story-based con clientes actuales'
+    ]
+  }
+};
+
+function renderSuggestions(bn){
+  const d=sugData[bn];
+  if(!d)return;
+
+  // CAUSA
+  const causeHints=document.getElementById('cause-hints');
+  const causeChips=document.getElementById('cause-chips');
+  const causeDiag=document.getElementById('cause-diag');
+  causeChips.innerHTML='';
+  d.causes.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='sug-chip';
+    btn.textContent=c;
+    btn.onclick=()=>{
+      const ta=document.getElementById('inp-cause');
+      ta.value=ta.value?ta.value+' '+c:c;
+      S.cause=ta.value;
+    };
+    causeChips.appendChild(btn);
+  });
+  causeDiag.textContent=d.causeDiag;
+  causeHints.style.display='block';
+
+  // ACCIÓN
+  const actionHints=document.getElementById('action-hints');
+  const actionChips=document.getElementById('action-chips');
+  actionChips.innerHTML='';
+  d.actions.forEach(a=>{
+    const btn=document.createElement('button');
+    btn.className='sug-chip';
+    btn.textContent=a;
+    btn.onclick=()=>{
+      const ta=document.getElementById('inp-action');
+      ta.value=ta.value?ta.value+'\n'+a:a;
+      S.action=ta.value;
+    };
+    actionChips.appendChild(btn);
+  });
+  actionHints.style.display='block';
+}
+
+// ─── BLOCKER LOGIC ───────────────────────────────────────
+function getCritical(){
+  const f=[];
+  if(S.problem==='no')f.push('Problema no validado — el mercado puede no tener necesidad real activa');
+  if(S.product==='no')f.push('Producto sin retención — feedback negativo o compra única sistemática');
+  if(S.model==='no')f.push('Modelo no rentable — CAC ≥ LTV, las ventas no escalan financieramente');
+  return f;
+}
+
+function evaluateBlocker(){
+  const critical=getCritical();
+  const bl=document.getElementById('blocker0');
+  const list=document.getElementById('blocker-list');
+  if(critical.length>0&&!S.forced){
+    list.innerHTML=critical.map(f=>`<li>⛔ ${f}</li>`).join('');
+    bl.classList.add('show');
+    document.getElementById('btn-to-mkt').disabled=true;
+  } else {
+    bl.classList.remove('show');
+    document.getElementById('btn-to-mkt').disabled=false;
+  }
+}
+
+function forceAdvance(){
+  S.forced=true;
+  document.getElementById('blocker0').classList.remove('show');
+  document.getElementById('btn-to-mkt').disabled=false;
+}
+
+// ─── NAV ACTIONS ─────────────────────────────────────────
+function goToMkt(){unlock(1);markDone(0);go(1);}
+function skipToMkt(){S.skipped=true;unlock(1);go(1);}
+
+// ─── LOOKUP TABLES ───────────────────────────────────────
+const stageL={hyp:'Hipótesis / pre-revenue',early:'Early adopters / tracción',growth:'Crecimiento / escalando',mid:'Empresa mediana o consolidada'};
+const bnL={reach:'Alcance — captación',conversion:'Conversión — leads que no cierran',retention:'Retención — churn o baja recompra',monetization:'Monetización — ticket o LTV bajo',unknown:'Sin claridad — diagnóstico de funnel necesario'};
+const metricL={winrate:'Win rate (% deals ganados vs. perdidos)',ctr:'CTR / tasa de conversión por etapa',churn:'Churn / tasa de recompra',ticket:'Ticket promedio / LTV',custom:'Métrica a definir por contexto específico'};
+const sprintL={'1w':'1 semana','2w':'2 semanas','4w':'4 semanas'};
+
+const riskL={
+  reach:'Sin visibilidad, el ICP nunca encuentra el producto. Sin captación, no hay pipeline para medir ninguna otra métrica.',
+  conversion:'Leads que no convierten agotan presupuesto y tiempo de ventas. El costo por oportunidad perdida escala con cada ciclo sin cierre.',
+  retention:'Churn alto destruye el LTV y hace que el CAC nunca se recupere. El negocio adquiere y pierde al mismo ritmo.',
+  monetization:'Ticket bajo con estructura de costos fija produce pérdida a escala. El problema se amplifica con el crecimiento.',
+  unknown:'Sin claridad del cuello de botella, cualquier acción de marketing es un experimento sin hipótesis válida.'
+};
+
+const toolsL={
+  reach:'Traction (Weinberg) — 19 canales · Content-market fit con ICP · Análisis de canal por cohorte',
+  conversion:'Sales story Dunford · SB7 framework (Miller) · Battle cards + objection handling (Lauchengco)',
+  retention:'Hook Model (Eyal) · Onboarding lifecycle PMM (Lauchengco) · Win/loss analysis sistemático',
+  monetization:'Value Proposition Canvas (Osterwalder) · Positioning Canvas Dunford · Unit economics (CAC/LTV/payback)',
+  unknown:'Experience Map (Torres) · Win/loss analysis · Datos mínimos de funnel por etapa'
+};
+
+const atlasL={
+  reach:'Cuello de botella en captación. En el Atlas: selecciona temperatura tráfico frío + etapa early/growth → funnel de captación recomendado.',
+  conversion:'Cuello de botella en conversión. En el Atlas: selecciona funnel de conversión B2B o ciclo largo según el contexto del deal.',
+  retention:'Cuello de botella en retención. En el Atlas: selecciona funnel de lifecycle o expansión de cuenta.',
+  monetization:'Cuello de botella en monetización. En el Atlas: selecciona funnel de upsell o expansión según modelo de pricing.',
+  unknown:'Sin claridad de cuello. En el Atlas: empieza por diagnóstico de etapa y temperatura de tráfico antes de elegir funnel.'
+};
+
+// AMPLIFY ROUTING
+function getRouting(){
+  const b=S.bottleneck;
+  const p=S.problem;
+  const pos=S.positioning;
+  const icp=S.icp;
+  if(!p||p==='no'||S.skipped){return{layer:'Diagnóstico',steps:'Analyze · Map',frameworks:['Torres — OST + entrevistas story-based','Torres — Experience Map'],rationale:'Sin validación de problema, el punto de entrada es definir el outcome real antes de cualquier acción estratégica.'}}
+  if(pos==='broken'||icp==='no'){return{layer:'Estrategia',steps:'Position · Launch',frameworks:['Dunford — 10 pasos de posicionamiento','Torres — validación de ICP con entrevistas','Moore — segmento prioritario (cabeza de playa)'],rationale:'Posicionamiento o ICP bloqueados. Resolver la estrategia antes de escalar. Dunford dice cómo posicionar, Moore dice a quién primero.'}}
+  if(b==='reach'){return{layer:'Ejecución + Aprendizaje',steps:'Iterate · Feedback',frameworks:['Lauchengco — demand gen · 4 hábitos PMM','Dunford — revisión de categoría de mercado','Torres — discovery continuo (¿el ICP es el correcto?)'],rationale:'Problema de distribución y visibilidad. El posicionamiento existe pero no llega al ICP. Activar canales correctos, no redefinir el mensaje.'}}
+  if(b==='conversion'){return{layer:'Estrategia → Ejecución',steps:'Position → Launch → Iterate',frameworks:['Dunford — sales story (traducción de posicionamiento a pitch)','Lauchengco — sales enablement · messaging house','Lauchengco — battle cards + objection handling'],rationale:'El cuello está en la traducción del posicionamiento a conversación de ventas. Dunford define el qué, Lauchengco construye los materiales que ventas puede usar sin PMM en cada deal.'}}
+  if(b==='retention'){return{layer:'Ejecución + Aprendizaje',steps:'Iterate · Feedback · Yield',frameworks:['Lauchengco — lifecycle PMM · métricas de impacto','Torres — discovery continuo semanal (¿qué falla post-compra?)','Lauchengco — onboarding · programas de expansión por cohorte'],rationale:'Problema de valor entregado post-compra. Torres mantiene el loop de aprendizaje activo; Lauchengco estructura el rol de retención con métricas de outcome, no de actividad.'}}
+  if(b==='monetization'){return{layer:'Estrategia',steps:'Position · Launch',frameworks:['Dunford — temas de valor · categoría de mercado','Lauchengco — pricing y packaging · segmento objetivo','Dunford — atributos únicos vs. alternativas competitivas'],rationale:'Ticket bajo generalmente indica posicionamiento poco diferenciado o propuesta de valor no articulada para el segmento con mayor disposición a pagar.'}}
+  return{layer:'Diagnóstico',steps:'Analyze · Map',frameworks:['Torres — Experience Map · OST con outcome por definir','Lauchengco — win/loss analysis sistemático','Torres — protocolo de entrevista story-based'],rationale:'Sin datos claros del funnel, el primer paso es mapear la experiencia actual e identificar dónde está la caída real con evidencia, no intuición.'};
+}
+
+// PLAYBOOKS
+function getPlaybook(){
+  const b=S.bottleneck;
+  const books={
+    reach:{color:'var(--bl-bg)',border:'rgba(55,138,221,.3)',labelColor:'var(--bl-t)',icon:'📡',label:'Playbook de Captación',title:'Alcance y visibilidad con el ICP correcto',items:['Definir canal primario por temperatura de tráfico','Content-market fit: ¿el contenido habla al ICP exacto?','19 canales Traction (Weinberg) — elegir 1-2 a probar','Distribución activa: SEO, outreach, partnerships ICP-específicos','KPI: alcance calificado · CTR por canal']},
+    conversion:{color:'var(--a-bg)',border:'rgba(229,185,122,.3)',labelColor:'var(--a-t)',icon:'🎯',label:'Playbook de Conversión',title:'De lead a cierre con mensaje que resuena',items:['Sales story Dunford: problema → alternativas → escenario ideal → tu producto','Messaging house: mensaje por segmento buyer vs. usuario operativo','Battle cards: top 3 alternativas competitivas del ICP','Objection handling: respuestas acordadas para top 5-7 objeciones','Demo script diferenciado por segmento','KPI: win rate · tasa de avance por etapa del deal']},
+    retention:{color:'var(--g-bg)',border:'rgba(122,173,122,.3)',labelColor:'var(--g-t)',icon:'🔁',label:'Playbook de Retención',title:'Activación, uso sostenido y expansión de cuenta',items:['Onboarding: tiempo al primer valor (time to value) < 48h','Hook Model (Eyal): trigger → acción → recompensa → inversión','Email de activación: comportamientos clave en primeros 7 días','Análisis de cohortes: retención mes 1 / mes 3','Lifecycle PMM (Lauchengco): programas de expansión medidos por NPS por segmento','KPI: tasa de recompra · churn mensual · NPS por cohorte']},
+    monetization:{color:'var(--gr-bg)',border:'rgba(168,163,156,.3)',labelColor:'var(--gr-t)',icon:'💰',label:'Playbook de Monetización',title:'Maximizar LTV con propuesta de valor diferenciada',items:['Revisión de temas de valor Dunford: ¿el segmento correcto está pagando?','Pricing por segmento: ¿hay un tier de alto valor sin atender?','Upsell / expansión: ¿hay un caso de uso adyacente para el ICP?','Value Proposition Canvas (Osterwalder): ganancias vs. dolores por segmento','KPI: ticket promedio · LTV · payback period']},
+    unknown:{color:'var(--te-bg)',border:'rgba(29,158,117,.3)',labelColor:'var(--te-t)',icon:'🔍',label:'Playbook de Diagnóstico',title:'Encontrar el cuello de botella real antes de actuar',items:['Experience Map (Torres): mapear experiencia actual cliente con el equipo','Win/loss analysis: revisar 10+ deals perdidos sistemáticamente','Datos mínimos de funnel: alcance → lead → demo → cierre por período','Entrevistas story-based con 5+ clientes actuales y 3+ perdidos','KPI: no hay KPI de ejecución hasta identificar el cuello']}
+  };
+  return books[b]||books['unknown'];
+}
+
+// ─── GENERATE OUTPUT ─────────────────────────────────────
+function genOutput(){
+  // Validaciones mínimas
+  if(!S.bottleneck){
+    const el=document.getElementById('qc-bn');
+    el.style.outline='1.5px solid var(--red)';
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{el.style.outline=''},2200);
+    return;
+  }
+  if(!S.cause||S.cause.trim().length<8){
+    const el=document.getElementById('inp-cause');
+    el.style.borderColor='var(--red)';
+    el.placeholder='⚠ Requerido — describe la causa del cuello de botella';
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.focus();
+    setTimeout(()=>{el.style.borderColor='';el.placeholder='Ej: el mensaje no resuena con el ICP porque está centrado en features, no en outcomes. Los leads llegan pero no entienden el valor antes de la demo.'},2500);
+    return;
+  }
+  if(!S.action||S.action.trim().length<8){
+    const el=document.getElementById('inp-action');
+    el.style.borderColor='var(--red)';
+    el.placeholder='⚠ Requerido — define la acción concreta a ejecutar';
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.focus();
+    setTimeout(()=>{el.style.borderColor='';el.placeholder='Ej: reconstruir la sales story de Dunford centrando los temas de valor en outcomes del cliente, testear en las próximas 3 conversaciones.'},2500);
+    return;
+  }
+
+  const score=calcScore();
+  const lv=getScoreLevel(score);
+  const routing=getRouting();
+  const pb=getPlaybook();
+  const now=new Date();
+  const stamp=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' · '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('out-stamp').textContent=stamp;
+
+  // SCORE DASHBOARD
+  document.getElementById('dash-score').textContent=score+'/100';
+  document.getElementById('dash-score').style.color=lv.color;
+  document.getElementById('dash-level').textContent=lv.label;
+  document.getElementById('dash-bar').style.width=score+'%';
+  document.getElementById('dash-bar').style.background=lv.bg;
+  const riskTxt=score>=80?'Bajo':score>=60?'Medio':score>=40?'Alto':'Crítico';
+  document.getElementById('dash-risk').textContent=riskTxt;
+  document.getElementById('dash-risk').style.color=lv.color;
+  document.getElementById('dash-action-label').textContent=lv.verdict;
+  document.getElementById('dash-bn').textContent=bnL[S.bottleneck]||'—';
+  document.getElementById('dash-sprint-label').textContent=sprintL[S.sprint]||'—';
+
+  // DIAGNÓSTICO
+  document.getElementById('o-stage').textContent=stageL[S.stage]||'No especificada';
+  const critical=getCritical();
+  const foundTxt=S.skipped?'Omitida (flujo directo a marketing)':S.forced?'Forzado con fallas críticas: '+critical.join('; '):critical.length>0?'Fallas críticas: '+critical.join('; '):score>=80?'Validada ✓':'Riesgo identificado — ver score';
+  document.getElementById('o-found').innerHTML=`<strong>${foundTxt}</strong>`;
+  document.getElementById('o-bn').textContent=bnL[S.bottleneck]||'No especificado';
+  const fdMap={yes:'Métricas disponibles de 2+ etapas del funnel',partial:'Datos parciales, no sistematizados',no:'Sin datos de funnel'};
+  document.getElementById('o-fdata').textContent=(fdMap[S.funnelData]||'—')+(S.evi.funnel_data?' — '+S.evi.funnel_data:'');
+
+  // PROBLEMA DOMINANTE
+  document.getElementById('o-problem').textContent=bnL[S.bottleneck]||'—';
+  document.getElementById('o-cause').textContent=S.cause||'[no especificada]';
+  const eviParts=[];
+  if(S.evi.problem_proof)eviParts.push('Problema: '+S.evi.problem_proof);
+  if(S.evi.product_proof)eviParts.push('Producto: '+S.evi.product_proof);
+  if(S.evi.funnel_data)eviParts.push('Funnel: '+S.evi.funnel_data);
+  document.getElementById('o-evidence').textContent=eviParts.length>0?eviParts.join(' · '):'Sin evidencia documentada';
+  document.getElementById('o-risk').textContent=riskL[S.bottleneck]||'—';
+
+  // EVIDENCIA FALTANTE — auto-generada
+  const autoGaps=[];
+  if(!S.evi.problem_proof&&!S.evi.problem_context) autoGaps.push('Evidencia del problema validado con usuarios reales');
+  if(!S.evi.icp_criteria) autoGaps.push('Criterio accionable de calificación del ICP');
+  if(!S.evi.model_numbers) autoGaps.push('Números de CAC / LTV / payback');
+  if(S.funnelData==='no'||(!S.evi.funnel_data&&S.funnelData!=='yes')) autoGaps.push('Datos de funnel por etapa (mínimo 2 etapas)');
+  const gapFinal=[];
+  if(S.evi.problem_gap) gapFinal.push(S.evi.problem_gap);
+  if(S.evi.product_gap) gapFinal.push(S.evi.product_gap);
+  const allGaps=[...gapFinal,...autoGaps];
+  document.getElementById('o-evigap').textContent=allGaps.length>0?allGaps.join(' · '):'Sin gaps críticos identificados';
+
+  // AMPLIFY
+  document.getElementById('o-layer').textContent=routing.layer;
+  document.getElementById('o-steps').textContent=routing.steps;
+  const fwEl=document.getElementById('o-frameworks');
+  fwEl.innerHTML='';
+  routing.frameworks.forEach(f=>{const c=document.createElement('span');c.className='fw-chip';c.textContent=f;fwEl.appendChild(c)});
+  document.getElementById('o-rationale').textContent=routing.rationale;
+
+  // HIPÓTESIS
+  const bnTxt=bnL[S.bottleneck]||'[problema]';
+  const cause=S.cause||'[causa no especificada]';
+  const action=S.action||'[acción no especificada]';
+  const metric=metricL[S.metric]||'[métrica a definir]';
+  const sprint=sprintL[S.sprint]||'[sprint a definir]';
+  document.getElementById('o-hyp').innerHTML=`Creemos que el problema dominante es <strong>${bnTxt}</strong><br>porque <strong>${cause}</strong><br>por lo tanto vamos a <strong>${action}</strong><br>para lograr mejora en <strong>${metric}</strong> en <strong>${sprint}</strong>.`;
+
+  // ACCIÓN
+  document.getElementById('o-action').textContent=S.action||'[no especificada]';
+  document.getElementById('o-metric').textContent=metricL[S.metric]||'[no especificada]';
+  document.getElementById('o-sprint').textContent=sprintL[S.sprint]||'[no especificado]';
+  document.getElementById('o-tools').textContent=toolsL[S.bottleneck]||'—';
+
+  // PLAYBOOK
+  const pbEl=document.getElementById('blk-pb');
+  pbEl.innerHTML=`<div class="pb-cta" style="background:${pb.color};border-color:${pb.border}">
+    <div class="pb-cta-icon">${pb.icon}</div>
+    <div class="pb-cta-body">
+      <div class="pb-cta-label" style="color:${pb.labelColor}">${pb.label}</div>
+      <div class="pb-cta-title">${pb.title}</div>
+      <div class="pb-items">${pb.items.map(i=>`<span class="pb-item">${i}</span>`).join('')}</div>
+    </div>
+  </div>`;
+
+  // ATLAS
+  document.getElementById('o-atlas').textContent=atlasL[S.bottleneck]||'Cuello de botella identificado. Seleccionar funnel correcto en el Atlas.';
+
+  // Update score strip too
+  document.getElementById('sc-num').textContent=score;
+  document.getElementById('sc-num').style.color=lv.color;
+  document.getElementById('sc-label').textContent=lv.label;
+  document.getElementById('sc-label').style.color=lv.color;
+  document.getElementById('sc-bar').style.width=score+'%';
+  document.getElementById('sc-bar').style.background=lv.bg;
+  document.getElementById('sc-verdict').textContent=lv.verdict;
+
+  unlock(2);markDone(1);go(2);
+}
+
+// ─── COPY ─────────────────────────────────────────────────
+function cpBlock(id){
+  const el=document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(()=>{
+    const btn=el.closest('.ob,.amp-card').querySelector('.cp-btn');
+    if(btn){btn.textContent='✓ Copiado';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied')},2000)}
+  });
+}
+
+function cpAll(){
+  const score=calcScore();
+  const lv=getScoreLevel(score);
+  const routing=getRouting();
+  const pb=getPlaybook();
+  const txt=`BRIEF DE DIAGNÓSTICO — ATLAS
+${document.getElementById('out-stamp').textContent}
+AMPLIFY — Sistema de Diagnóstico de Marketing
+
+═══════════════════════════════
+SCORE DE FUNDACIÓN: ${score}/100 · ${lv.label} · ${lv.verdict}
+═══════════════════════════════
+
+01 · DIAGNÓSTICO
+Etapa: ${stageL[S.stage]||'No especificada'}
+Fundación: ${document.getElementById('o-found').innerText}
+Cuello de botella: ${bnL[S.bottleneck]||'No especificado'}
+Datos: ${document.getElementById('o-fdata').innerText}
+
+02 · PROBLEMA DOMINANTE
+Problema: ${bnL[S.bottleneck]||'—'}
+Causa: ${S.cause||'[no especificada]'}
+Evidencia: ${document.getElementById('o-evidence').innerText}
+Evidencia faltante: ${document.getElementById('o-evigap').innerText}
+Riesgo: ${riskL[S.bottleneck]||'—'}
+
+03 · AMPLIFY ROUTING
+Capa: ${routing.layer}
+Pasos: ${routing.steps}
+Frameworks: ${routing.frameworks.join(' · ')}
+Razonamiento: ${routing.rationale}
+
+04 · HIPÓTESIS
+Creemos que el problema dominante es ${bnL[S.bottleneck]||'[problema]'}
+porque ${S.cause||'[causa]'}
+por lo tanto vamos a ${S.action||'[acción]'}
+para lograr mejora en ${metricL[S.metric]||'[métrica]'} en ${sprintL[S.sprint]||'[sprint]'}.
+
+05 · ACCIÓN RECOMENDADA
+Acción: ${S.action||'—'}
+Métrica: ${metricL[S.metric]||'—'}
+Sprint: ${sprintL[S.sprint]||'—'}
+Herramienta: ${toolsL[S.bottleneck]||'—'}
+
+06 · PLAYBOOK: ${pb.label}
+${pb.items.join('\n')}
+
+07 · SIGUIENTE SISTEMA
+Funnel Atlas 2026 — ${atlasL[S.bottleneck]||'—'}`;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.getElementById('cp-all-btn');
+    btn.textContent='✓ Copiado';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar todo';btn.classList.remove('copied')},2500);
+  });
+}
+
+function openAtlas(){
+  const params=new URLSearchParams({
+    bn: S.bottleneck||'',
+    etapa: S.stage||'',
+    score: calcScore()
+  });
+  window.open('https://brenda-vega.github.io/Funnel-Atlas-2026/?'+params.toString(),'_blank');
+}
+
+// ─── RESTART ─────────────────────────────────────────────
+function restart(){
+  Object.keys(S).forEach(k=>{S[k]=typeof S[k]==='string'?'':typeof S[k]==='boolean'?false:null});
+  S.evi={};S.cause='';S.action='';
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel','sel-warn','sel-block'));
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('ok','warn','block'));
+  document.querySelectorAll('.evi-wrap').forEach(e=>{if(e.id)e.style.display='none'});
+  document.querySelectorAll('input.evi-inp,textarea.evi-inp').forEach(i=>i.value='');
+  document.getElementById('blocker0').classList.remove('show');
+  document.getElementById('btn-to-mkt').disabled=false;
+  ['nav1','nav2'].forEach(id=>{const el=document.getElementById(id);el.classList.remove('done');el.classList.add('locked')});
+  document.getElementById('nav0').classList.remove('done');
+  updateScore();
+  go(0);
+}
+
+// ─── SCROLL TOP ───────────────────────────────────────────
+window.addEventListener('scroll',()=>{document.getElementById('stop').classList.toggle('vis',window.scrollY>300)});
+</script>
+</body>
+</html>
